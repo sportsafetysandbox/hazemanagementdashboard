@@ -36,25 +36,25 @@
   .banner[hidden] { display: none; }
 
   /* map: width = screen width, cards sit at their geographic spots */
-  .map { position: relative; width: 100%; aspect-ratio: 100 / 92; margin: 4px 0 18px; }
+  .map { position: relative; width: 100%; aspect-ratio: 100 / 80; margin: 16px 0 26px; }
   .map svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
   .map svg path { fill: var(--land); }
   .card {
-    position: absolute; z-index: 1; width: 29%; transform: translate(-50%, -50%);
+    position: absolute; z-index: 1; width: 24%; transform: translate(-50%, -50%);
     background: #fff; border: 1px solid #d3d7da; border-radius: 3px; overflow: hidden;
     box-shadow: 0 1px 3px rgba(0,0,0,.18);
   }
-  .card.north   { left: 50%; top: 13%; }
-  .card.west    { left: 17%; top: 47%; }
-  .card.central { left: 50%; top: 49%; }
-  .card.east    { left: 83%; top: 42%; }
-  .card.south   { left: 50%; top: 84%; }
-  .card h2 { margin: 0; text-align: center; font-size: 10.5px; letter-spacing: .6px; padding: 3px 0 2px; background: var(--hdr, #eee); }
-  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; padding: 0 3px 4px; background: var(--hdr, #eee); }
-  .col .lbl { font-size: 8px; line-height: 1.1; text-align: center; margin-bottom: 2px; color: #33383d; }
+  .card.north   { left: 43.7%; top: 8.9%; }
+  .card.west    { left: 18.2%; top: 37.6%; }
+  .card.central { left: 43.8%; top: 37.6%; }
+  .card.east    { left: 69.9%; top: 37.6%; }
+  .card.south   { left: 43.9%; top: 64.4%; }
+  .card h2 { margin: 0; text-align: center; font-size: 10px; letter-spacing: .4px; padding: 3px 0 2px; background: var(--hdr, #eee); }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 0 2px 3px; background: var(--hdr, #eee); }
+  .col .lbl { font-size: 7.5px; line-height: 1.1; text-align: center; margin-bottom: 2px; color: #33383d; }
   .pill {
     display: flex; align-items: center; justify-content: center;
-    height: 26px; border-radius: 2px; font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums;
+    height: 24px; border-radius: 2px; font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums;
     background: #ccc; color: var(--ink); letter-spacing: -.3px;
   }
   .pill.green  { background: var(--green);  color: #fff; }
@@ -76,6 +76,7 @@
   .bar.b5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .seg { min-width: 0; }
   @media (max-width: 360px) {
+    .map { aspect-ratio: 100 / 88; }
     .legend .row { grid-template-columns: 54px 1fr; gap: 6px; }
     .legend .name { font-size: 11.5px; }
     .seg span { font-size: 9px; }
