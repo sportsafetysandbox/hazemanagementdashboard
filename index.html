@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
-<title>Singapore Haze Update</title>
+<title>Singapore Haze Situation Update</title>
 <style>
   :root {
     --green: #5ba85a;  --green-t: #e3f1e2;
@@ -26,7 +26,7 @@
     padding: max(10px, env(safe-area-inset-top)) 16px max(10px, env(safe-area-inset-bottom));
     max-width: 480px; margin-inline: auto;
   }
-  h1 { font-size: 24px; line-height: 1.1; margin: 4px 0 3px; letter-spacing: -.4px; }
+  h1 { font-size: clamp(17px, 5.4vw, 24px); line-height: 1.1; margin: 4px 0 3px; letter-spacing: -.4px; }
   .asat { color: var(--alert); font-size: 18px; font-weight: 800; margin: 0 0 6px; }
   .lede { font-size: 13.5px; line-height: 1.3; margin: 0 0 4px; }
   .banner {
@@ -90,9 +90,9 @@
 </style>
 </head>
 <body>
-  <h1>Singapore haze update</h1>
+  <h1>Singapore Haze Situation Update</h1>
   <p class="asat" id="asat">Loading…</p>
-  <p class="lede">Use 1-hour PM2.5 and 24-hour PSI readings to plan outdoor activities today and tomorrow respectively.</p>
+  <p class="lede">Use 1-hour PM2.5 readings to plan immediate outdoor activities, and 24-hour PSI readings to plan next-day activities.</p>
   <div class="banner" id="banner" hidden></div>
 
   <div class="map" id="map" aria-live="polite">
@@ -150,10 +150,10 @@
   function fmtAsAt(iso) {
     var d = new Date(iso);
     if (isNaN(d)) return "";
-    var p = new Intl.DateTimeFormat("en-SG", { timeZone: "Asia/Singapore", hour: "numeric", minute: "2-digit", hour12: true, month: "short", day: "numeric" }).formatToParts(d);
+    var p = new Intl.DateTimeFormat("en-SG", { timeZone: "Asia/Singapore", hour: "numeric", minute: "2-digit", hour12: true, day: "numeric", month: "short", year: "numeric" }).formatToParts(d);
     var o = {}; p.forEach(function (x) { o[x.type] = x.value; });
     var time = o.minute === "00" ? o.hour + o.dayPeriod.toLowerCase() : o.hour + ":" + o.minute + o.dayPeriod.toLowerCase();
-    return "As at " + time + ", " + o.month + " " + o.day;
+    return "As at " + time + ", " + o.day + " " + o.month + " " + o.year;
   }
 
   function render(data) {
