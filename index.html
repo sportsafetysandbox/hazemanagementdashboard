@@ -291,14 +291,14 @@
   /* ---------- Decision matrix for next-day activities (SportSG) ----------
      The decision is taken from the HIGHER band of the 24-hr PSI forecast range. */
   var PROCEED = "<b>To proceed</b> as planned";
-  var CANCEL_ALL = '<span class="stop">To Cancel, or Postpone all SportSG-organised Activities</span>';
+  var CANCEL_ALL = '<span class="stop">To Cancel, or Postpone all Organised Activities</span>';
   var DECISIONS = {
     good:      { name: "Good",           range: "0–50",    c: "#5ba85a", t: "#e3f1e2", ct: "#fff",
                  outdoor: PROCEED, aircon: PROCEED },
     moderate:  { name: "Moderate",       range: "51–100",  c: "#3f7fd6", t: "#dfeaf9", ct: "#fff",
                  outdoor: PROCEED, aircon: PROCEED },
     unhealthy: { name: "Unhealthy",      range: "101–200", c: "#f6c61b", t: "#fcf0b8", ct: "#14171a",
-                 outdoor: "<b>To modify</b> Intensity of SportSG-organised Activities<br><br>For SportSG-organised Activities that cannot be modified<sup>1</sup>:<br>" +
+                 outdoor: "<b>To modify</b> Intensity of Organised Activities<br><br>For Organised Activities that cannot be modified<sup>1</sup>:<br>" +
                           '<span class="stop">To Cancel, or Postpone</span>',
                  aircon: PROCEED, footnote: true },
     veryunhealthy: { name: "Very Unhealthy", range: "201–300", c: "#f28b3c", t: "#fbd9bf", ct: "#14171a",
@@ -326,13 +326,13 @@
     { n: 1, name: "Normal",    range: "0–55",    c: "#5ba85a", t: "#e3f1e2", ct: "#fff",
       outdoor: "To continue <b>as planned</b>" },
     { n: 2, name: "Elevated",  range: "56–150",  c: "#f6c61b", t: "#fcf0b8", ct: "#14171a",
-      outdoor: "<b>To modify Intensity of SportSG-organised Activities</b><br><br>For <b>SportSG-organised Activities that cannot be modified</b>: " + STOP("To suspend") },
+      outdoor: "<b>To modify Intensity of Organised Activities</b><br><br>For <b>Organised Activities that cannot be modified</b>: " + STOP("To suspend") },
     { n: 3, name: "High",      range: "151–250", c: "#f28b3c", t: "#fbd9bf", ct: "#14171a",
-      outdoor: STOP("To suspend") + " on-going <b>SportSG-organised Activities</b><br><br>" +
-               STOP("To cancel") + " <b>SportSG-organised Activities</b> scheduled in the next 3hr Window<br><br>" +
+      outdoor: STOP("To suspend") + " on-going <b>Organised Activities</b><br><br>" +
+               STOP("To cancel") + " <b>Organised Activities</b> scheduled in the next 3hr Window<br><br>" +
                STOP("Strongly Encourage") + " users to avoid Strenuous Activities" },
     { n: 4, name: "Very High", range: ">250",    c: "#d8352d", t: "#f6cfcc", ct: "#fff",
-      outdoor: STOP("To Cancel,<br>or Postpone all SportSG-organised Activities") + "<br><br>" +
+      outdoor: STOP("To Cancel,<br>or Postpone all Organised Activities") + "<br><br>" +
                STOP("Actively Stop") + " users from entering Outdoor and Non-Airconditioned Facilities" }
   ];
   function hourlyBand(v) { return v <= 55 ? HOURLY[0] : v <= 150 ? HOURLY[1] : v <= 250 ? HOURLY[2] : HOURLY[3]; }
