@@ -92,6 +92,19 @@
   .forecast svg { width: 100%; max-width: 340px; height: auto; display: block; margin: 0 auto; }
   .forecast .note { font-size: 11px; color: var(--muted); margin: 0; }
   .forecast .note[hidden] { display: none; }
+  /* Island-wide next-day decision */
+  .decision { margin-top: 14px; padding-top: 10px; border-top: 1px solid #e3e6e8; }
+  .decision[hidden] { display: none; }
+  .decision h2 { margin: 0 0 6px; font-size: 14px; letter-spacing: .2px; line-height: 1.25; }
+  .dbasis { font-size: 12px; line-height: 1.35; margin: 0 0 8px; color: #33383d; }
+  .dchip { display: inline-block; font-weight: 800; font-size: 12px; padding: 2px 8px; border-radius: 3px; margin-left: 2px; background: var(--c); color: var(--ct, #fff); white-space: nowrap; }
+  .dcards { display: grid; gap: 8px; }
+  .dcard { background: var(--t); border-left: 5px solid var(--c); border-radius: 3px; padding: 8px 10px; }
+  .dcard h3 { margin: 0 0 3px; font-size: 12px; letter-spacing: .2px; }
+  .dcard p { margin: 0; font-size: 13px; line-height: 1.35; }
+  .dcard .stop { color: #c00000; font-weight: 800; }
+  .dfoot { font-size: 10.5px; line-height: 1.4; color: var(--muted); margin: 8px 0 0; }
+  .dfoot[hidden] { display: none; }
   footer { color: var(--muted); font-size: 10.5px; margin-top: 2px; line-height: 1.4; }
   footer b { font-weight: 600; }
 </style>
@@ -134,6 +147,16 @@
     <h2>PSI FORECAST FOR NEXT DAY</h2>
     <svg id="gauge" viewBox="0 0 300 202" role="img" aria-label="PSI forecast gauge"></svg>
     <p class="note" id="fnote" hidden></p>
+  </section>
+
+  <section class="decision" id="decision" hidden aria-label="Island-wide next-day decision for all facilities">
+    <h2>Island-Wide Next-Day Decision for all Facilities</h2>
+    <p class="dbasis" id="dbasis"></p>
+    <div class="dcards">
+      <div class="dcard" id="dout"><h3>Outdoor Activities</h3><p></p></div>
+      <div class="dcard" id="dac"><h3>Activities in Airconditioned Facilities</h3><p></p></div>
+    </div>
+    <p class="dfoot" id="dfoot" hidden><sup>1</sup> <b>Activities that cannot be modified</b>, refers to activities that are <b>strenuous and/or prolonged</b> in nature and cannot be modified. e.g., Competitions, Endurance Races, Fitness &amp; Proficiency Assessments.</p>
   </section>
 
   <footer>
@@ -226,7 +249,40 @@
     var p = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Singapore", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
     return p; // YYYY-MM-DD
   }
+  /* ---------- Decision matrix for next-day activities (SportSG) ----------
+     The decision is taken from the HIGHER band of the 24-hr PSI forecast range. */
+  var PROCEED = "<b>To proceed</b> as planned";
+  var CANCEL_ALL = '<span class="stop">To Cancel, or Postpone all SportSG-organised Activities</span>';
+  var DECISIONS = {
+    good:      { name: "Good",           range: "0–50",    c: "#5ba85a", t: "#e3f1e2", ct: "#fff",
+                 outdoor: PROCEED, aircon: PROCEED },
+    moderate:  { name: "Moderate",       range: "51–100",  c: "#3f7fd6", t: "#dfeaf9", ct: "#fff",
+                 outdoor: PROCEED, aircon: PROCEED },
+    unhealthy: { name: "Unhealthy",      range: "101–200", c: "#f6c61b", t: "#fcf0b8", ct: "#14171a",
+                 outdoor: "<b>To modify</b> Intensity of SportSG-organised Activities<br><br>For SportSG-organised Activities that cannot be modified<sup>1</sup>:<br>" +
+                          '<span class="stop">To Cancel, or Postpone</span>',
+                 aircon: PROCEED, footnote: true },
+    veryunhealthy: { name: "Very Unhealthy", range: "201–300", c: "#f28b3c", t: "#fbd9bf", ct: "#14171a",
+                 outdoor: CANCEL_ALL, aircon: PROCEED },
+    hazardous: { name: "Hazardous",      range: ">300",    c: "#d8352d", t: "#f6cfcc", ct: "#fff",
+                 outdoor: CANCEL_ALL, aircon: CANCEL_ALL }
+  };
+  function bandKey(v) { return v <= 50 ? "good" : v <= 100 ? "moderate" : v <= 200 ? "unhealthy" : v <= 300 ? "veryunhealthy" : "hazardous"; }
+  function renderDecision(d) {
+    var box = document.getElementById("decision");
+    if (!d || !isNum(d.high)) { box.hidden = true; return; }
+    var b = DECISIONS[bandKey(d.high)];                       // higher band of the forecast range
+    box.style.setProperty("--c", b.c); box.style.setProperty("--t", b.t); box.style.setProperty("--ct", b.ct);
+    document.getElementById("dbasis").innerHTML = "Based on the higher band of the 24-hr PSI forecast for " + fmtDay(d.forecast_date) +
+      " (" + d.low + " - " + d.high + "): <span class=\"dchip\">" + b.name.toUpperCase() + " (" + b.range + ")</span>";
+    document.querySelector("#dout p").innerHTML = b.outdoor;
+    document.querySelector("#dac p").innerHTML = b.aircon;
+    document.getElementById("dfoot").hidden = !b.footnote;
+    box.hidden = false;
+  }
+
   function renderForecast(d) {
+    renderDecision(d);
     var box = document.getElementById("forecast");
     if (!d || !isNum(d.low) || !isNum(d.high)) { box.hidden = true; return; }
     var lo = d.low, hi = d.high, s = "";
@@ -268,7 +324,7 @@
     fetch(FORECAST_URL + "?t=" + Date.now(), { cache: "no-store" })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(renderForecast)
-      .catch(function () { document.getElementById("forecast").hidden = true; });
+      .catch(function () { document.getElementById("forecast").hidden = true; document.getElementById("decision").hidden = true; });
   }
 
   function load() {
