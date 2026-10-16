@@ -122,6 +122,16 @@
   .rpm { flex: none; min-width: 54px; text-align: center; background: var(--c); color: var(--ct, #fff); font-weight: 800; font-size: 19px; line-height: 1; padding: 6px 8px; border-radius: 3px; font-variant-numeric: tabular-nums; }
   .rpm small { display: block; font-size: 8.5px; font-weight: 600; margin-top: 2px; opacity: .9; }
   .rcard.na .rpm { color: #fff; }
+  .rfac { margin-top: 8px; border-top: 1px solid rgba(0,0,0,.14); }
+  .rfac summary { display: flex; align-items: center; justify-content: space-between; min-height: 40px; margin-top: 2px; cursor: pointer; font-size: 12.5px; font-weight: 700; list-style: none; -webkit-tap-highlight-color: transparent; }
+  .rfac summary::-webkit-details-marker { display: none; }
+  .rfac summary::after { content: ""; width: 8px; height: 8px; margin: 0 4px 3px 8px; border: solid #33383d; border-width: 0 2px 2px 0; transform: rotate(45deg); transition: transform .15s; }
+  .rfac[open] summary::after { transform: rotate(-135deg); margin-bottom: -2px; }
+  .rfac summary:focus-visible { outline: 2px solid #14171a; outline-offset: 2px; }
+  .rfac ul { list-style: none; margin: 0 0 2px; padding: 0; }
+  .rfac li { padding: 6px 9px; font-size: 12.5px; line-height: 1.3; background: rgba(255,255,255,.62); }
+  .rfac li:nth-child(even) { background: rgba(255,255,255,.3); }
+  .rfoot { font-size: 10.5px; line-height: 1.4; color: var(--muted); margin: 8px 0 0; }
   .rlbl { font-size: 11px; font-weight: 800; letter-spacing: .2px; margin: 0 0 2px; text-transform: uppercase; color: #33383d; }
   .rtxt { margin: 0; font-size: 13px; line-height: 1.35; }
   .rtxt .stop { color: #c00000; font-weight: 800; }
@@ -185,6 +195,7 @@
     <p class="rbasis" id="rbasis"></p>
     <p class="rnote" id="rnote" hidden></p>
     <div class="rcards" id="rcards"></div>
+    <p class="rfoot" id="rfoot" hidden></p>
   </section>
 
   <footer>
@@ -327,7 +338,27 @@
                STOP("Actively Stop") + " users from entering Outdoor and Non-Airconditioned Facilities" }
   ];
   function hourlyBand(v) { return v <= 55 ? HOURLY[0] : v <= 150 ? HOURLY[1] : v <= 250 ? HOURLY[2] : HOURLY[3]; }
+  var facilities = null, lastData = null, openFac = {};
+  function esc(t) { return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function facHtml(key) {                                    // accordion: list of sport centres in the region
+    var list = facilities && facilities.regions && facilities.regions[key];
+    if (!list || !list.length) return "";
+    return '<details class="rfac" data-region="' + key + '"' + (openFac[key] ? " open" : "") + '>' +
+      '<summary>Sport Centres (' + list.length + ')</summary><ul>' +
+      list.map(function (n) { return "<li>" + esc(n) + "</li>"; }).join("") + "</ul></details>";
+  }
+  function loadFacilities() {
+    fetch("data/facilities.json?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (j) { facilities = j; if (lastData) renderRegional(lastData); })
+      .catch(function () { /* the decision blocks still work without the list */ });
+  }
+  document.getElementById("rcards").addEventListener("toggle", function (e) {   // remember open/closed across refreshes
+    var d = e.target; if (d && d.dataset && d.dataset.region) openFac[d.dataset.region] = d.open;
+  }, true);
+
   function renderRegional(data) {
+    lastData = data;
     var pm = data.pm25_1hr || {}, box = document.getElementById("regional");
     var any = REGIONS.some(function (r) { return isNum(pm[r[0]]); });
     if (!any) { box.hidden = true; return; }
@@ -336,7 +367,7 @@
       var v = pm[r[0]];
       if (!isNum(v)) {
         html += '<div class="rcard na"><div class="rtop"><div><div class="rname">' + r[1] + '</div><div class="rband">1-hr PM2.5 reading unavailable</div></div>' +
-                '<div class="rpm">–</div></div><p class="rtxt">No decision can be made without a current reading. Check haze.gov.sg.</p></div>';
+                '<div class="rpm">–</div></div><p class="rtxt">No decision can be made without a current reading. Check haze.gov.sg.</p>' + facHtml(r[0]) + '</div>';
         return;
       }
       var b = hourlyBand(v);
@@ -344,9 +375,11 @@
         '<div class="rtop"><div><div class="rname">' + r[1] + '</div>' +
         '<div class="rband">Band ' + b.n + ' (' + b.name + ') · ' + b.range + '</div></div>' +
         '<div class="rpm">' + Math.round(v) + '<small>1-hr PM2.5</small></div></div>' +
-        '<div class="rlbl">Outdoor Activities</div><p class="rtxt">' + b.outdoor + '</p></div>';
+        '<div class="rlbl">Outdoor Activities</div><p class="rtxt">' + b.outdoor + '</p>' + facHtml(r[0]) + '</div>';
     });
     document.getElementById("rcards").innerHTML = html;
+    var ff = document.getElementById("rfoot");
+    if (facilities && facilities.updated) { ff.hidden = false; ff.textContent = "Sport centre list (SportSG, Sport Facilities by NEA Region) as at " + fmtAsAt(facilities.updated).replace(/^As at /, "") + "."; } else ff.hidden = true;
     var when = fmtAsAt(pm.timestamp).replace(/^As at /, "");
     document.getElementById("rbasis").textContent = "Based on each region's current 1-hr PM2.5 reading" + (when ? " as at " + when + "." : ".");
     var note = document.getElementById("rnote"), msg = "";
@@ -406,6 +439,7 @@
 
   function load() {
     loadForecast();
+    if (!facilities) loadFacilities();
     fetch(DATA_URL + "?t=" + Date.now(), { cache: "no-store" })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(render)

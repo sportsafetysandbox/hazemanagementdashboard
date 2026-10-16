@@ -1,0 +1,50 @@
+{
+  "source": "SportSG - Sport Facilities by NEA Region",
+  "updated": "2026-10-14T14:35:00+08:00",
+  "regions": {
+    "north": [
+      "Woodlands Sport Centre",
+      "Yishun Sport Centre",
+      "Yio Chu Kang Sport Centre",
+      "Bukit Canberra Sport Centre",
+      "Sengkang Sport Centre",
+      "Punggol Sport Centre"
+    ],
+    "west": [
+      "Clementi Sport Centre",
+      "Jurong East Sport Centre",
+      "Jurong West Sport Centre",
+      "ActiveSG Sport Village @ Jurong Town",
+      "ActiveSG Park @ Jurong Lake Gardens",
+      "ActiveSG Hockey Village @ Boon Lay",
+      "Bukit Gombak Sport Centre",
+      "Bukit Batok Swimming Complex",
+      "Choa Chu Kang Sport Centre"
+    ],
+    "central": [
+      "Toa Payoh Sport Centre",
+      "Bishan Sport Centre",
+      "ActiveSG Sport Park @ Teck Ghee",
+      "Burghley Tennis & Squash Centre"
+    ],
+    "east": [
+      "Kallang Sport Centre",
+      "Katong Swimming Complex",
+      "Jalan Besar Sport Centre",
+      "Geylang East Swimming Complex",
+      "Hougang Sport Centre",
+      "Serangoon Sport Centre",
+      "Heartbeat@Bedok ActiveSG Sport Centre",
+      "Bedok Stadium",
+      "Tampines Sport Centre",
+      "Our Tampines Hub",
+      "Pasir Ris Sport Centre"
+    ],
+    "south": [
+      "Queenstown Sport Centre",
+      "MOE Evans Sport Centre",
+      "Delta Sport Centre",
+      "ActiveSG Gym @ Enabling Village"
+    ]
+  }
+}
