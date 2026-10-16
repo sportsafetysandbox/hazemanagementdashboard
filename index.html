@@ -179,12 +179,11 @@
     <p class="note" id="fnote" hidden></p>
   </section>
 
-  <section class="decision" id="decision" hidden aria-label="Island-wide next-day decision for all facilities">
-    <h2>Island-Wide Next-Day Decision for all Facilities</h2>
+  <section class="decision" id="decision" hidden aria-label="Island-wide next-day decisions">
+    <h2>Island-Wide Next-Day Decisions</h2>
     <p class="dbasis" id="dbasis"></p>
     <div class="dcards">
       <div class="dcard" id="dout"><h3>Outdoor Activities</h3><p></p></div>
-      <div class="dcard" id="dac"><h3>Activities in Airconditioned Facilities</h3><p></p></div>
     </div>
     <p class="dfoot" id="dfoot" hidden><sup>1</sup> <b>Activities that cannot be modified</b>, refers to activities that are <b>strenuous and/or prolonged</b> in nature and cannot be modified. e.g., Competitions, Endurance Races, Fitness &amp; Proficiency Assessments.</p>
   </section>
@@ -316,7 +315,6 @@
     document.getElementById("dbasis").innerHTML = "Based on the higher band of the 24-hr PSI forecast for " + fmtDay(d.forecast_date) +
       " (" + d.low + " - " + d.high + "): <span class=\"dchip\">" + b.name.toUpperCase() + " (" + b.range + ")</span>";
     document.querySelector("#dout p").innerHTML = b.outdoor;
-    document.querySelector("#dac p").innerHTML = b.aircon;
     document.getElementById("dfoot").hidden = !b.footnote;
     box.hidden = false;
   }
