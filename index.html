@@ -169,7 +169,7 @@
     var msgs = [];
     if (data.sample) msgs.push("Showing sample data. Live readings appear after the first scheduled update runs.");
     var t = new Date(stamp);
-    if (!isNaN(t) && (Date.now() - t.getTime()) > STALE_HOURS * 3600 * 1000) {
+    if (!data.sample && !isNaN(t) && (Date.now() - t.getTime()) > STALE_HOURS * 3600 * 1000) {
       msgs.push("These readings are more than " + STALE_HOURS + " hours old. Data may be delayed.");
     }
     var b = document.getElementById("banner");
