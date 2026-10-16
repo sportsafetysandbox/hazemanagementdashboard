@@ -23,6 +23,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install OCR tools (used to read the forecast gauge image)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr python3-pil
+
       - name: Collect readings every 15 minutes
         env:
           DATA_GOV_SG_API_KEY: ${{ secrets.DATA_GOV_SG_API_KEY }}   # optional
@@ -32,6 +35,8 @@ jobs:
           end=$(( $(date +%s) + 20400 ))          # stop after 5h40m, before the 6h job limit
           while true; do
             python3 scripts/fetch_data.py || echo "fetch failed, will retry next cycle"
+            # PSI forecast agent: after 18:15 SGT, retries each cycle until tomorrow's forecast is stored
+            python3 scripts/fetch_forecast.py --when-due || echo "forecast check failed, will retry next cycle"
             git add data/
             if ! git diff --cached --quiet; then
               git commit -q -m "Update haze data $(date -u +'%Y-%m-%dT%H:%MZ')"
