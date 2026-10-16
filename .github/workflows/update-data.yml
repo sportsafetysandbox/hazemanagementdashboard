@@ -1,37 +1,52 @@
 name: Update haze data
 
+# GitHub's built-in scheduler is unreliable on this repo (it never fired), so this
+# workflow keeps itself running: each run collects every 15 minutes for ~5h40m,
+# then starts the next run. The cron below is only a backup to restart the chain.
 on:
   schedule:
-    - cron: "7,22,37,52 * * * *"   # every 15 minutes, offset from :00/:15/:30/:45 where GitHub drops the most runs
-  workflow_dispatch:          # lets you run it manually from the Actions tab
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
 
 permissions:
   contents: write
+  actions: write   # lets a run start the next run
 
 concurrency:
   group: update-haze-data
-  cancel-in-progress: false
+  cancel-in-progress: false   # a newer run waits for the current one instead of cancelling it
 
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 355
     steps:
       - uses: actions/checkout@v4
 
-      - name: Fetch readings from data.gov.sg
+      - name: Collect readings every 15 minutes
         env:
           DATA_GOV_SG_API_KEY: ${{ secrets.DATA_GOV_SG_API_KEY }}   # optional
-        run: python3 scripts/fetch_data.py
-
-      - name: Commit updated tables
         run: |
           git config user.name "haze-bot"
           git config user.email "haze-bot@users.noreply.github.com"
-          git add data/
-          if git diff --cached --quiet; then
-            echo "No changes"
-          else
-            git commit -m "Update haze data $(date -u +'%Y-%m-%dT%H:%MZ')"
-            git pull --rebase --autostash
-            git push
-          fi
+          end=$(( $(date +%s) + 20400 ))          # stop after 5h40m, before the 6h job limit
+          while true; do
+            python3 scripts/fetch_data.py || echo "fetch failed, will retry next cycle"
+            git add data/
+            if ! git diff --cached --quiet; then
+              git commit -q -m "Update haze data $(date -u +'%Y-%m-%dT%H:%MZ')"
+              git pull -q --rebase --autostash || true
+              git push -q || echo "push failed, will retry next cycle"
+            fi
+            now=$(date +%s)
+            next=$(( now - now % 900 + 900 + 120 ))   # next quarter-hour, plus 2 minutes
+            if [ "$next" -ge "$end" ]; then break; fi
+            sleep $(( next - now ))
+          done
+
+      - name: Start the next run
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api -X POST "repos/${{ github.repository }}/actions/workflows/update-data.yml/dispatches" -f ref=main
