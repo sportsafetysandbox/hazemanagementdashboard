@@ -2,7 +2,7 @@ name: Update haze data
 
 on:
   schedule:
-    - cron: "*/15 * * * *"   # every 15 minutes (GitHub may delay runs by a few minutes)
+    - cron: "7,22,37,52 * * * *"   # every 15 minutes, offset from :00/:15/:30/:45 where GitHub drops the most runs
   workflow_dispatch:          # lets you run it manually from the Actions tab
 
 permissions:
