@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Singapore Haze Update</title>
+<style>
+  :root {
+    --green: #5ba85a;  --green-t: #e3f1e2;
+    --blue: #3f7fd6;   --blue-t: #dfeaf9;
+    --yellow: #f6c61b; --yellow-t: #fcf0b8;
+    --orange: #f28b3c; --orange-t: #fbd9bf;
+    --red: #d8352d;    --red-t: #f6cfcc;
+    --ink: #14171a;
+    --muted: #5d656d;
+    --bg: #ffffff;
+    --land: #e6e8ea;
+    --alert: #e1262d;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+    max-width: 480px; margin-inline: auto;
+  }
+  h1 { font-size: 30px; line-height: 1.1; margin: 8px 0 6px; letter-spacing: -.5px; }
+  .asat { color: var(--alert); font-size: 22px; font-weight: 800; margin: 0 0 12px; }
+  .lede { font-size: 17px; line-height: 1.35; margin: 0 0 14px; }
+  .banner {
+    background: #fff4d6; border: 1px solid #f0d27a; color: #6b5200;
+    border-radius: 8px; padding: 8px 10px; font-size: 13px; margin: 0 0 12px;
+  }
+  .banner[hidden] { display: none; }
+
+  /* map-style grid */
+  .map {
+    position: relative; display: grid; gap: 14px 10px; margin: 6px 0 22px;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-areas: ". north ." "west central east" ". south .";
+  }
+  .map svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+  .map svg path { fill: var(--land); }
+  .card { position: relative; z-index: 1; background: #fff; border: 1px solid #d9dcdf; border-radius: 3px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .card.north { grid-area: north; } .card.west { grid-area: west; } .card.central { grid-area: central; }
+  .card.east { grid-area: east; } .card.south { grid-area: south; }
+  .card h2 { margin: 0; text-align: center; font-size: 13px; letter-spacing: .5px; padding: 5px 0; background: var(--hdr, #eee); }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 5px 5px 6px; background: var(--hdr, #eee); }
+  .col .lbl { font-size: 10px; line-height: 1.15; text-align: center; margin-bottom: 3px; min-height: 23px; }
+  .pill {
+    display: flex; align-items: center; justify-content: center;
+    height: 40px; border-radius: 3px; font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums;
+    background: #ccc; color: var(--ink);
+  }
+  .pill.green  { background: var(--green);  color: #fff; }
+  .pill.blue   { background: var(--blue);   color: #fff; }
+  .pill.yellow { background: var(--yellow); color: var(--ink); }
+  .pill.orange { background: var(--orange); color: #fff; }
+  .pill.red    { background: var(--red);    color: #fff; }
+  .pill.na     { background: #d5d8db; color: #6b7178; font-size: 18px; }
+  .card.green  { --hdr: var(--green-t); }  .card.blue { --hdr: var(--blue-t); }
+  .card.yellow { --hdr: var(--yellow-t); } .card.orange { --hdr: var(--orange-t); }
+  .card.red    { --hdr: var(--red-t); }
+
+  /* legend */
+  .legend { margin-top: 4px; }
+  .legend .row { display: grid; grid-template-columns: 62px 1fr; gap: 8px; align-items: end; margin-bottom: 14px; }
+  .legend .name { font-size: 13px; font-weight: 700; line-height: 1.15; padding-bottom: 5px; }
+  .bar { display: grid; gap: 2px; }
+  .bar.b4 { grid-template-columns: repeat(4, 1fr); }
+  .bar.b5 { grid-template-columns: repeat(5, 1fr); }
+  .seg { font-size: 11px; text-align: center; }
+  .seg i { display: block; height: 22px; margin-top: 3px; font-style: normal; font-size: 11px; line-height: 22px; color: #fff; font-weight: 600; }
+  .seg i.dark { color: var(--ink); }
+  .seg .g { background: var(--green); } .seg .b { background: var(--blue); } .seg .y { background: var(--yellow); }
+  .seg .o { background: var(--orange); } .seg .r { background: var(--red); }
+  .seg span { display: block; font-size: 10.5px; line-height: 1.1; min-height: 24px; display: flex; align-items: flex-end; justify-content: center; }
+  footer { color: var(--muted); font-size: 12px; margin-top: 6px; line-height: 1.5; }
+  footer b { font-weight: 600; }
+</style>
+</head>
+<body>
+  <h1>Singapore haze update</h1>
+  <p class="asat" id="asat">Loading…</p>
+  <p class="lede">Use 1-hour PM2.5 and 24-hour PSI readings to plan outdoor activities today and tomorrow respectively.</p>
+  <div class="banner" id="banner" hidden></div>
+
+  <div class="map" id="map" aria-live="polite">
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M2 40 C8 30 14 32 20 36 C26 30 34 28 40 24 C46 18 58 20 66 24 C74 26 84 30 92 38 C98 46 94 56 86 60 C78 68 64 72 56 80 C48 86 38 84 30 78 C22 72 12 68 6 58 C2 52 0 46 2 40Z"/>
+    </svg>
+  </div>
+
+  <section class="legend" aria-label="Colour legend">
+    <div class="row">
+      <div class="name">1-hour PM2.5</div>
+      <div class="bar b4">
+        <div class="seg"><span>Normal</span><i class="g">0–55</i></div>
+        <div class="seg"><span>Elevated</span><i class="y dark">56–150</i></div>
+        <div class="seg"><span>High</span><i class="o">151–250</i></div>
+        <div class="seg"><span>Very high</span><i class="r">≥251</i></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="name">24-hour PSI</div>
+      <div class="bar b5">
+        <div class="seg"><span>Good</span><i class="g">0–50</i></div>
+        <div class="seg"><span>Moderate</span><i class="b">51–100</i></div>
+        <div class="seg"><span>Unhealthy</span><i class="y dark">101–200</i></div>
+        <div class="seg"><span>Very unhealthy</span><i class="o">201–300</i></div>
+        <div class="seg"><span>Hazardous</span><i class="r">&gt;300</i></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div>Source: National Environment Agency via data.gov.sg</div>
+    <div id="meta"></div>
+  </footer>
+
+<script>
+(function () {
+  "use strict";
+  var DATA_URL = "data/latest.json";   // table-derived file stored in this GitHub repo
+  var REFRESH_MS = 5 * 60 * 1000;
+  var STALE_HOURS = 3;
+  var REGIONS = [["north", "NORTH"], ["west", "WEST"], ["central", "CENTRAL"], ["east", "EAST"], ["south", "SOUTH"]];
+
+  function pm25Band(v) { return v <= 55 ? "green" : v <= 150 ? "yellow" : v <= 250 ? "orange" : "red"; }
+  function psiBand(v)  { return v <= 50 ? "green" : v <= 100 ? "blue" : v <= 200 ? "yellow" : v <= 300 ? "orange" : "red"; }
+
+  function isNum(v) { return typeof v === "number" && isFinite(v); }
+
+  function pill(v, bandFn) {
+    return isNum(v)
+      ? '<div class="pill ' + bandFn(v) + '">' + Math.round(v) + '</div>'
+      : '<div class="pill na">–</div>';
+  }
+
+  function fmtAsAt(iso) {
+    var d = new Date(iso);
+    if (isNaN(d)) return "";
+    var p = new Intl.DateTimeFormat("en-SG", { timeZone: "Asia/Singapore", hour: "numeric", minute: "2-digit", hour12: true, month: "short", day: "numeric" }).formatToParts(d);
+    var o = {}; p.forEach(function (x) { o[x.type] = x.value; });
+    var time = o.minute === "00" ? o.hour + o.dayPeriod.toLowerCase() : o.hour + ":" + o.minute + o.dayPeriod.toLowerCase();
+    return "As at " + time + ", " + o.month + " " + o.day;
+  }
+
+  function render(data) {
+    var pm = data.pm25_1hr || {}, psi = data.psi_24hr || {};
+    var html = "";
+    REGIONS.forEach(function (r) {
+      var k = r[0], pv = pm[k], sv = psi[k];
+      var hdr = isNum(pv) ? pm25Band(pv) : (isNum(sv) ? psiBand(sv) : "");
+      html += '<div class="card ' + k + " " + hdr + '"><h2>' + r[1] + '</h2><div class="cols">' +
+        '<div class="col"><div class="lbl">1-hour<br>PM2.5</div>' + pill(pv, pm25Band) + '</div>' +
+        '<div class="col"><div class="lbl">24-hour<br>PSI</div>' + pill(sv, psiBand) + '</div>' +
+        '</div></div>';
+    });
+    var map = document.getElementById("map");
+    map.querySelectorAll(".card").forEach(function (n) { n.remove(); });
+    map.insertAdjacentHTML("beforeend", html);
+
+    var stamp = pm.timestamp || psi.timestamp || data.fetched_at;
+    document.getElementById("asat").textContent = fmtAsAt(stamp) || "Latest reading";
+
+    var msgs = [];
+    if (data.sample) msgs.push("Showing sample data. Live readings appear after the first scheduled update runs.");
+    var t = new Date(stamp);
+    if (!isNaN(t) && (Date.now() - t.getTime()) > STALE_HOURS * 3600 * 1000) {
+      msgs.push("These readings are more than " + STALE_HOURS + " hours old. Data may be delayed.");
+    }
+    var b = document.getElementById("banner");
+    b.hidden = msgs.length === 0; b.textContent = msgs.join(" ");
+
+    if (data.fetched_at) {
+      document.getElementById("meta").textContent = "Data last collected " + fmtAsAt(data.fetched_at).replace("As at ", "") + " (SGT). Refreshes automatically.";
+    }
+  }
+
+  function load() {
+    fetch(DATA_URL + "?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(render)
+      .catch(function () {
+        document.getElementById("asat").textContent = "Unable to load readings";
+        var b = document.getElementById("banner");
+        b.hidden = false; b.textContent = "Could not load the latest data. Check your connection and try again.";
+      });
+  }
+
+  load();
+  setInterval(load, REFRESH_MS);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) load(); });
+})();
+</script>
+</body>
+</html>
