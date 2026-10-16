@@ -105,6 +105,26 @@
   .dcard .stop { color: #c00000; font-weight: 800; }
   .dfoot { font-size: 10.5px; line-height: 1.4; color: var(--muted); margin: 8px 0 0; }
   .dfoot[hidden] { display: none; }
+  /* Regional hourly decisions (Outdoor Activities) */
+  .regional { margin-top: 14px; padding-top: 10px; border-top: 1px solid #e3e6e8; }
+  .regional[hidden] { display: none; }
+  .regional h2 { margin: 0 0 2px; font-size: 14px; letter-spacing: .2px; line-height: 1.25; }
+  .regional .sub { font-size: 11.5px; color: var(--muted); margin: 0 0 4px; }
+  .rbasis { font-size: 12px; line-height: 1.35; margin: 0 0 8px; color: #33383d; }
+  .rnote { font-size: 12px; line-height: 1.35; margin: 0 0 8px; padding: 6px 9px; border-radius: 6px; background: #fff4d6; border: 1px solid #f0d27a; color: #6b5200; }
+  .rnote[hidden] { display: none; }
+  .rcards { display: grid; gap: 8px; }
+  .rcard { background: var(--t); border-left: 5px solid var(--c); border-radius: 3px; padding: 8px 10px; }
+  .rcard.na { --c: #9aa0a6; --t: #eceeef; }
+  .rtop { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
+  .rname { font-weight: 800; font-size: 13px; letter-spacing: .6px; }
+  .rband { font-size: 11px; font-weight: 600; line-height: 1.25; color: #33383d; }
+  .rpm { flex: none; min-width: 54px; text-align: center; background: var(--c); color: var(--ct, #fff); font-weight: 800; font-size: 19px; line-height: 1; padding: 6px 8px; border-radius: 3px; font-variant-numeric: tabular-nums; }
+  .rpm small { display: block; font-size: 8.5px; font-weight: 600; margin-top: 2px; opacity: .9; }
+  .rcard.na .rpm { color: #fff; }
+  .rlbl { font-size: 11px; font-weight: 800; letter-spacing: .2px; margin: 0 0 2px; text-transform: uppercase; color: #33383d; }
+  .rtxt { margin: 0; font-size: 13px; line-height: 1.35; }
+  .rtxt .stop { color: #c00000; font-weight: 800; }
   footer { color: var(--muted); font-size: 10.5px; margin-top: 2px; line-height: 1.4; }
   footer b { font-weight: 600; }
 </style>
@@ -159,6 +179,14 @@
     <p class="dfoot" id="dfoot" hidden><sup>1</sup> <b>Activities that cannot be modified</b>, refers to activities that are <b>strenuous and/or prolonged</b> in nature and cannot be modified. e.g., Competitions, Endurance Races, Fitness &amp; Proficiency Assessments.</p>
   </section>
 
+  <section class="regional" id="regional" hidden aria-label="Regional hourly decisions for outdoor activities">
+    <h2>Regional Hourly Decisions</h2>
+    <p class="sub">Outdoor Activities (scheduled to proceed for the day)</p>
+    <p class="rbasis" id="rbasis"></p>
+    <p class="rnote" id="rnote" hidden></p>
+    <div class="rcards" id="rcards"></div>
+  </section>
+
   <footer>
     <div>Source: National Environment Agency via data.gov.sg</div>
     <div id="meta"></div>
@@ -193,6 +221,7 @@
   }
 
   function render(data) {
+    renderRegional(data);
     var pm = data.pm25_1hr || {}, psi = data.psi_24hr || {};
     var html = "";
     REGIONS.forEach(function (r) {
@@ -278,6 +307,54 @@
     document.querySelector("#dout p").innerHTML = b.outdoor;
     document.querySelector("#dac p").innerHTML = b.aircon;
     document.getElementById("dfoot").hidden = !b.footnote;
+    box.hidden = false;
+  }
+
+  /* ---------- Hourly decision matrix, Outdoor Activities (SportSG) ----------
+     Band is taken from each region's current 1-hr PM2.5 reading. */
+  var STOP = function (t) { return '<span class="stop">' + t + '</span>'; };
+  var HOURLY = [
+    { n: 1, name: "Normal",    range: "0–55",    c: "#5ba85a", t: "#e3f1e2", ct: "#fff",
+      outdoor: "To continue <b>as planned</b>" },
+    { n: 2, name: "Elevated",  range: "56–150",  c: "#f6c61b", t: "#fcf0b8", ct: "#14171a",
+      outdoor: "<b>To modify Intensity of SportSG-organised Activities</b><br><br>For <b>SportSG-organised Activities that cannot be modified</b>: " + STOP("To suspend") },
+    { n: 3, name: "High",      range: "151–250", c: "#f28b3c", t: "#fbd9bf", ct: "#14171a",
+      outdoor: STOP("To suspend") + " on-going <b>SportSG-organised Activities</b><br><br>" +
+               STOP("To cancel") + " <b>SportSG-organised Activities</b> scheduled in the next 3hr Window<br><br>" +
+               STOP("Strongly Encourage") + " users to avoid Strenuous Activities" },
+    { n: 4, name: "Very High", range: ">250",    c: "#d8352d", t: "#f6cfcc", ct: "#fff",
+      outdoor: STOP("To Cancel,<br>or Postpone all SportSG-organised Activities") + "<br><br>" +
+               STOP("Actively Stop") + " users from entering Outdoor and Non-Airconditioned Facilities" }
+  ];
+  function hourlyBand(v) { return v <= 55 ? HOURLY[0] : v <= 150 ? HOURLY[1] : v <= 250 ? HOURLY[2] : HOURLY[3]; }
+  function renderRegional(data) {
+    var pm = data.pm25_1hr || {}, box = document.getElementById("regional");
+    var any = REGIONS.some(function (r) { return isNum(pm[r[0]]); });
+    if (!any) { box.hidden = true; return; }
+    var html = "";
+    REGIONS.forEach(function (r) {
+      var v = pm[r[0]];
+      if (!isNum(v)) {
+        html += '<div class="rcard na"><div class="rtop"><div><div class="rname">' + r[1] + '</div><div class="rband">1-hr PM2.5 reading unavailable</div></div>' +
+                '<div class="rpm">–</div></div><p class="rtxt">No decision can be made without a current reading. Check haze.gov.sg.</p></div>';
+        return;
+      }
+      var b = hourlyBand(v);
+      html += '<div class="rcard" style="--c:' + b.c + ';--t:' + b.t + ';--ct:' + b.ct + '">' +
+        '<div class="rtop"><div><div class="rname">' + r[1] + '</div>' +
+        '<div class="rband">Band ' + b.n + ' (' + b.name + ') · ' + b.range + '</div></div>' +
+        '<div class="rpm">' + Math.round(v) + '<small>1-hr PM2.5</small></div></div>' +
+        '<div class="rlbl">Outdoor Activities</div><p class="rtxt">' + b.outdoor + '</p></div>';
+    });
+    document.getElementById("rcards").innerHTML = html;
+    var when = fmtAsAt(pm.timestamp).replace(/^As at /, "");
+    document.getElementById("rbasis").textContent = "Based on each region's current 1-hr PM2.5 reading" + (when ? " as at " + when + "." : ".");
+    var note = document.getElementById("rnote"), msg = "";
+    var t = new Date(pm.timestamp);
+    if (data.sample) msg = "Sample data only. Do not use these decisions.";
+    else if (!isNaN(t) && (Date.now() - t.getTime()) > STALE_HOURS * 3600 * 1000)
+      msg = "These readings are more than " + STALE_HOURS + " hours old. Check haze.gov.sg before acting on these decisions.";
+    note.hidden = !msg; note.textContent = msg;
     box.hidden = false;
   }
 
