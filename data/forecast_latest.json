@@ -1,8 +1,8 @@
 {
-  "forecast_date": "2026-10-19",
-  "low": 101,
-  "high": 190,
-  "band_low": "Unhealthy",
+  "forecast_date": "2026-10-20",
+  "low": 90,
+  "high": 160,
+  "band_low": "Moderate",
   "band_high": "Unhealthy",
-  "checked_at": "2026-10-18T22:01:58+08:00"
+  "checked_at": "2026-10-19T18:55:30+08:00"
 }
