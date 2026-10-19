@@ -47,6 +47,20 @@ BANDS = [(50, "Good"), (100, "Moderate"), (200, "Unhealthy"), (300, "Very Unheal
 FIELDS = ["forecast_date", "low", "high", "band_low", "band_high", "checked_at"]
 
 
+STATUS = {}
+
+
+def write_status(**kw):
+    """Record what the last attempt saw, so a failure can be diagnosed from the repo."""
+    STATUS.update(kw)
+    STATUS["attempted_at"] = datetime.now(SGT).isoformat(timespec="seconds")
+    try:
+        DATA.mkdir(exist_ok=True)
+        (DATA / "forecast_status.json").write_text(json.dumps(STATUS, indent=2) + "\n")
+    except Exception:  # noqa: BLE001
+        pass
+
+
 def band(v):
     return next(name for top, name in BANDS if v <= top)
 
@@ -210,20 +224,32 @@ def main():
             img = Path(args.image)
         else:
             html = http_get(PAGE).decode("utf-8", "replace")
+            write_status(result="page fetched", html_bytes=len(html),
+                         imgs=re.findall(r"<img[^>]*>", html)[:12])
             gauge_url, header_url = find_images(html)
             header_date = date_from_filename(header_url)
             img = Path(tmp) / "gauge.png"
             sep = "&" if "?" in gauge_url else "?"
             img.write_bytes(http_get(f"{gauge_url}{sep}t={int(time.time())}"))
+            write_status(result="gauge downloaded", gauge_url=gauge_url, header_url=header_url, image_bytes=img.stat().st_size)
+            (DATA / "forecast_images").mkdir(parents=True, exist_ok=True)
+            (DATA / "forecast_images" / "last_attempt.png").write_bytes(img.read_bytes())
             print(f"gauge image: {gauge_url}  header date: {header_date}")
-        lo, hi, fdate = read_gauge(img)
+        try:
+            lo, hi, fdate = read_gauge(img)
+        except Exception as e:  # noqa: BLE001
+            write_status(result="ocr failed", error=str(e))
+            raise
         if header_date and header_date != fdate:
             print(f"page is mid-update: gauge says {fdate}, header says {header_date}; will retry", file=sys.stderr)
+            write_status(result="mid-update", gauge_date=str(fdate), header_date=str(header_date))
             return 1
         if args.when_due and fdate != tomorrow:
             print(f"page still shows the forecast for {fdate}, not {tomorrow} yet; will retry next cycle")
+            write_status(result="page still shows old forecast", gauge_date=str(fdate), lo=lo, hi=hi)
             return 0
         store(fdate, lo, hi, img)
+        write_status(result="stored", forecast_date=str(fdate), lo=lo, hi=hi)
     return 0
 
 
@@ -232,4 +258,5 @@ if __name__ == "__main__":
         sys.exit(main())
     except Exception as e:  # noqa: BLE001
         print(f"ERROR: {e}", file=sys.stderr)
+        write_status(result="error", error=str(e))
         sys.exit(1)
