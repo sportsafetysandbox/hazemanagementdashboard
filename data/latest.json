@@ -1,19 +1,19 @@
 {
-  "fetched_at": "2026-10-20T00:47:01+08:00",
+  "fetched_at": "2026-10-20T01:02:00+08:00",
   "pm25_1hr": {
-    "timestamp": "2026-10-20T00:00:00+08:00",
-    "north": 46,
-    "south": 74,
-    "east": 64,
-    "west": 94,
-    "central": 77
+    "timestamp": "2026-10-20T01:00:00+08:00",
+    "north": 38,
+    "south": 58,
+    "east": 68,
+    "west": 105,
+    "central": 71
   },
   "psi_24hr": {
-    "timestamp": "2026-10-20T00:00:00+08:00",
+    "timestamp": "2026-10-20T01:00:00+08:00",
     "north": 86,
-    "south": 92,
-    "east": 96,
-    "west": 115,
+    "south": 93,
+    "east": 97,
+    "west": 117,
     "central": 111
   }
 }
