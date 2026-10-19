@@ -136,10 +136,19 @@ def read_gauge(path):
     base = Image.open(path).convert("RGB")
     ranges, dates = Counter(), Counter()
     passes = 0
+    variants = []
     for scale in (2, 3):
-        big = ImageOps.autocontrast(ImageOps.grayscale(
-            base.resize((base.width * scale, base.height * scale), Image.LANCZOS)))
-        for psm in (11, 6):
+        big = base.resize((base.width * scale, base.height * scale), Image.LANCZOS)
+        variants.append(ImageOps.autocontrast(ImageOps.grayscale(big)))
+        # The range sits in a coloured pill (dark green is hard for plain greyscale OCR):
+        # keep only the near-black text pixels, on white.
+        dark = big.convert("L").point(lambda v: 0 if v < 80 else 255)
+        variants.append(dark)
+        w, h = dark.size
+        variants.append(dark.crop((int(w * .25), int(h * .50), int(w * .75), int(h * .82))))
+    if True:
+        for big in variants:
+          for psm in (11, 6):
             passes += 1
             text = tesseract(big, psm)
             for line in text.splitlines():
