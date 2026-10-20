@@ -1,6 +1,6 @@
 {
-  "result": "stored",
-  "html_bytes": 68126,
+  "result": "page still shows old forecast",
+  "html_bytes": 67756,
   "imgs": [
     "<img src=\"/assets/images/design/logo.png\" alt=\"National Environment Agency\">",
     "<img src=\"/images/default-source/health-advisory-images/header-image_20-oct.png\" style=\"display:block;width:100%;height:auto;border:0;\" alt=\"PSI Forecast Header\" />",
@@ -15,11 +15,11 @@
     "<img alt=\"wind speed legend\" src=\"/assets/images/legend-wind-speed.jpg\" />",
     "<img src=\"/images/default-source/health-advisory-images/haze-pm-psi-guide-a4-yoca-english_18-oct.jpg\" alt=\"NEA PSI Poster\">"
   ],
-  "attempted_at": "2026-10-20T00:59:33+08:00",
+  "attempted_at": "2026-10-20T18:17:05+08:00",
   "gauge_url": "https://www.haze.gov.sg/images/default-source/health-advisory-images/chart_20-oct.png",
   "header_url": "https://www.haze.gov.sg/images/default-source/health-advisory-images/header-image_20-oct.png",
   "image_bytes": 41411,
-  "forecast_date": "2026-10-20",
+  "gauge_date": "2026-10-20",
   "lo": 90,
   "hi": 160
 }
