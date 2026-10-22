@@ -1,11 +1,11 @@
 {
-  "result": "page still shows old forecast",
-  "html_bytes": 68018,
+  "result": "stored",
+  "html_bytes": 68004,
   "imgs": [
     "<img src=\"/assets/images/design/logo.png\" alt=\"National Environment Agency\">",
-    "<img src=\"/images/default-source/health-advisory-images/header_21-oct_22-oct-2026.png\" style=\"display:block;width:100%;height:auto;border:0;\" alt=\"PSI Forecast Header\" />",
-    "<img src=\"/images/default-source/health-advisory-images/table-of-advice_22-oct-2026.png\" style=\"display:inline-block;max-width:100%;height:auto;border:0;\" alt=\"PSI Gauge\" />",
-    "<img src=\"/images/default-source/health-advisory-images/chart_21-oct_22-oct-2026.png\" style=\"display:inline-block;max-width:100%;height:auto;border:0;\" alt=\"Health Advisory Table\" />",
+    "<img src=\"/images/default-source/health-advisory-images/header_22-oct_2026.png\" style=\"display:block;width:100%;height:auto;border:0;\" alt=\"PSI Forecast Header\" />",
+    "<img src=\"/images/default-source/health-advisory-images/chart_23_oct-2026.png\" style=\"display:inline-block;max-width:100%;height:auto;border:0;\" alt=\"PSI Gauge\" />",
+    "<img src=\"/images/default-source/health-advisory-images/table-of-advice_23-oct_2026.png\" style=\"display:inline-block;max-width:100%;height:auto;border:0;\" alt=\"Health Advisory Table\" />",
     "<img src=\"/assets/images/map/map.png\" alt=\"map\">",
     "<img src=\"/assets/images/map/map.png\" alt=\"map\">",
     "<img alt=\"dense haze legend\" src=\"/assets/images/legend-dense-haze.jpg\" />",
@@ -15,11 +15,11 @@
     "<img alt=\"wind speed legend\" src=\"/assets/images/legend-wind-speed.jpg\" />",
     "<img src=\"/images/default-source/health-advisory-images/haze-pm-psi-guide-a4-yoca-english_18-oct.jpg\" alt=\"NEA PSI Poster\">"
   ],
-  "attempted_at": "2026-10-22T18:32:04+08:00",
-  "gauge_url": "https://www.haze.gov.sg/images/default-source/health-advisory-images/table-of-advice_22-oct-2026.png",
-  "header_url": "https://www.haze.gov.sg/images/default-source/health-advisory-images/header_21-oct_22-oct-2026.png",
-  "image_bytes": 49963,
-  "gauge_date": "2026-10-22",
+  "attempted_at": "2026-10-22T18:47:06+08:00",
+  "gauge_url": "https://www.haze.gov.sg/images/default-source/health-advisory-images/chart_23_oct-2026.png",
+  "header_url": "https://www.haze.gov.sg/images/default-source/health-advisory-images/header_22-oct_2026.png",
+  "image_bytes": 50278,
+  "forecast_date": "2026-10-23",
   "lo": 101,
-  "hi": 160
+  "hi": 150
 }
