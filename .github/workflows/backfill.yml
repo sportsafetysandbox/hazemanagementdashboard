@@ -1,0 +1,40 @@
+name: Backfill haze data
+
+# Fills gaps in the tables from data.gov.sg's own history. Run by hand:
+# Actions -> Backfill haze data -> Run workflow (set how many days back to check).
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "How many days back to check"
+        default: "2"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: backfill-haze-data
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Backfill and commit
+        env:
+          DATA_GOV_SG_API_KEY: ${{ secrets.DATA_GOV_SG_API_KEY }}   # optional
+        run: |
+          git config user.name "haze-bot"
+          git config user.email "haze-bot@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch -q origin main && git reset -q --hard origin/main
+            python3 scripts/backfill.py "${{ github.event.inputs.days }}"
+            git add data/
+            if git diff --cached --quiet; then echo "nothing to add"; exit 0; fi
+            git commit -q -m "Backfill haze data"
+            if git push -q; then exit 0; fi
+            echo "push rejected (relay pushed first), retrying"
+          done
+          exit 1
