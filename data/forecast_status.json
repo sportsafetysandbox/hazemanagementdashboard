@@ -15,7 +15,7 @@
     "<img alt=\"wind speed legend\" src=\"/assets/images/legend-wind-speed.jpg\" />",
     "<img src=\"/images/default-source/health-advisory-images/haze-pm-psi-guide-a4-yoca-english_18-oct.jpg\" alt=\"NEA PSI Poster\">"
   ],
-  "attempted_at": "2026-10-23T19:17:02+08:00",
+  "attempted_at": "2026-10-23T19:32:02+08:00",
   "gauge_url": "https://www.haze.gov.sg/images/default-source/health-advisory-images/psi-forecast_2026-10-24.png",
   "header_url": "https://www.haze.gov.sg/images/default-source/health-advisory-images/psi-header_2026-10-24.png",
   "image_bytes": 60508,
