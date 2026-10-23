@@ -34,13 +34,21 @@ jobs:
           git config user.email "haze-bot@users.noreply.github.com"
           end=$(( $(date +%s) + 20400 ))          # stop after 5h40m, before the 6h job limit
           while true; do
+            # Start every cycle from the newest published state. A failed rebase (e.g. someone
+            # pushed the same files meanwhile) must never leave this long-running job stuck.
+            git rebase --abort 2>/dev/null || true
+            git fetch -q origin main && git reset -q --hard origin/main || true
             python3 scripts/fetch_data.py || echo "fetch failed, will retry next cycle"
             # PSI forecast agent: after 18:15 SGT, retries each cycle until tomorrow's forecast is stored
             python3 scripts/fetch_forecast.py --when-due || echo "forecast check failed, will retry next cycle"
             git add data/
             if ! git diff --cached --quiet; then
               git commit -q -m "Update haze data $(date -u +'%Y-%m-%dT%H:%MZ')"
-              git pull -q --rebase --autostash || true
+              if ! git pull -q --rebase --autostash; then
+                echo "rebase conflict, dropping this cycle's commit"
+                git rebase --abort 2>/dev/null || true
+                git reset -q --hard origin/main || true
+              fi
               git push -q || echo "push failed, will retry next cycle"
             fi
             now=$(date +%s)
