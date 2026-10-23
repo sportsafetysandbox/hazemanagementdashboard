@@ -132,6 +132,56 @@ RANGE_RE = re.compile(r"^\W*(\d{2,3})\s*[-–—−~+=_:]\s*(\d{2,3})\W*$")
 DATE_RE = re.compile(r"Forecast\s*for\s*(\d{1,2})\s*([A-Za-z]{3})", re.I)
 
 
+def text_on_pill(img):
+    """The range sits in a two-colour pill whose text colour varies (white on dark green,
+    black on yellow...). Crop the pill area, find each half's background colour (the most
+    common clearly-coloured shade), and mark pixels inside the pill that differ strongly
+    from it as text. Returns black text on white."""
+    from collections import Counter as C
+    w, h = img.size
+    box = img.crop((int(w * .28), int(h * .55), int(w * .72), int(h * .88))).convert("RGB")
+    bw, bh = box.size
+    px = box.load()
+    out = Image.new("L", box.size, 255)
+    op = out.load()
+
+    def saturated(p):
+        return max(p) - min(p) > 80
+
+    bgs = []
+    for x0, x1 in ((0, bw // 2), (bw // 2, bw)):
+        cnt = C()
+        for y in range(0, bh, 2):
+            for x in range(x0, x1, 2):
+                p = px[x, y]
+                if saturated(p):
+                    cnt[(p[0] // 24, p[1] // 24, p[2] // 24)] += 1
+        if not cnt:
+            return out
+        bgs.append(tuple(v * 24 + 12 for v in cnt.most_common(1)[0][0]))
+
+    def dist(p, q):
+        return abs(p[0] - q[0]) + abs(p[1] - q[1]) + abs(p[2] - q[2])
+
+    xs, ys = [], []
+    for y in range(bh):
+        for x in range(bw):
+            if min(dist(px[x, y], bgs[0]), dist(px[x, y], bgs[1])) < 70:
+                xs.append(x); ys.append(y)
+    if not xs:
+        return out
+    # trim the bounding box to the dense core so stray arc pixels do not widen it
+    xs.sort(); ys.sort()
+    n = len(xs)
+    bx0, bx1, by0, by1 = xs[int(n * .02)], xs[int(n * .98)], ys[int(n * .02)], ys[int(n * .98)]
+    for y in range(by0, by1 + 1):
+        for x in range(bx0, bx1 + 1):
+            bg = bgs[0] if x < bw // 2 else bgs[1]
+            if dist(px[x, y], bg) > 200:
+                op[x, y] = 0
+    return out.crop((max(bx0 - 10, 0), max(by0 - 10, 0), min(bx1 + 10, bw), min(by1 + 10, bh)))
+
+
 def read_gauge(path):
     base = Image.open(path).convert("RGB")
     ranges, dates = Counter(), Counter()
@@ -146,9 +196,10 @@ def read_gauge(path):
         variants.append(dark)
         w, h = dark.size
         variants.append(dark.crop((int(w * .25), int(h * .50), int(w * .75), int(h * .82))))
+        variants.append(text_on_pill(big))
     if True:
         for big in variants:
-          for psm in (11, 6):
+          for psm in (11, 6, 7):
             passes += 1
             text = tesseract(big, psm)
             for line in text.splitlines():
