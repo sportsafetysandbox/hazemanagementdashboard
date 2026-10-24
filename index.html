@@ -99,7 +99,15 @@
   .forecast { margin-top: 14px; padding-top: 10px; border-top: 1px solid #e3e6e8; text-align: center; }
   .forecast[hidden] { display: none; }
   .forecast h2 { margin: 0 0 2px; font-size: 14px; letter-spacing: .4px; text-align: left; }
-  .forecast svg { width: 100%; max-width: 340px; height: auto; display: block; margin: 0 auto; }
+  .fcrow { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .forecast svg { flex: 0 0 62%; width: 62%; min-width: 0; height: auto; display: block; margin: 0; }
+  .adv { flex: 1 1 0; min-width: 0; text-align: left; border-radius: 3px; overflow: hidden; background: var(--at, #f4f4f4); border-top: 4px solid var(--ac, #ccc); }
+  .adv .ah { margin: 0; padding: 5px 7px 4px; font-size: 11px; font-weight: 800; line-height: 1.2; background: var(--at, #eee); color: #14171a; }
+  .adv .ah small { display: block; font-size: 10px; font-weight: 700; }
+  .adv .ab { margin: 0; padding: 5px 7px 6px; font-size: 10.5px; line-height: 1.25; background: rgba(255,255,255,.5); border-top: 2px solid #fff; color: #14171a; }
+  .adv .ab:nth-of-type(even) { background: rgba(255,255,255,.28); }
+  .adv .who { display: block; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .2px; color: #4a5056; margin-bottom: 2px; }
+  @media (max-width: 340px) { .fcrow { flex-direction: column; } .forecast svg { flex-basis: auto; width: 100%; max-width: 300px; } .adv { width: 100%; } }
   .forecast .note { font-size: 11px; color: var(--muted); margin: 0; }
   .forecast .note[hidden] { display: none; }
   /* Island-wide next-day decision */
@@ -186,7 +194,10 @@
 
   <section class="forecast" id="forecast" hidden aria-label="PSI forecast for next day">
     <h2>PSI FORECAST FOR NEXT DAY</h2>
-    <svg id="gauge" viewBox="0 0 300 202" role="img" aria-label="PSI forecast gauge"></svg>
+    <div class="fcrow">
+      <svg id="gauge" viewBox="0 0 300 202" role="img" aria-label="PSI forecast gauge"></svg>
+      <div class="adv" id="adv" aria-label="Health advisory for the higher forecast band"></div>
+    </div>
     <p class="note" id="fnote" hidden></p>
   </section>
 
@@ -401,6 +412,29 @@
     box.hidden = false;
   }
 
+  /* Health advisory by PSI forecast band (NEA, "For next-day outdoor activities") */
+  var WHO = ["Healthy Persons", "Elderly, Pregnant Women, Children", "Persons with Chronic Lung Disease, Heart Disease"];
+  var ADV = {
+    good:      { h: "GOOD - MODERATE", r: "(0 - 100)", c: "#3f9b3f", t: "#e3f1e2", rows: ["<b>Normal activities</b>", "<b>Normal activities</b>", "<b>Normal activities</b>"] },
+    unhealthy: { h: "UNHEALTHY", r: "(101 - 200)", c: "#f6c61b", t: "#fcf0b8",
+                 rows: ["<b>REDUCE</b> prolonged or strenuous outdoor physical exertion",
+                        "<b>MINIMISE</b> prolonged or strenuous outdoor physical exertion",
+                        "<b>AVOID</b> prolonged or strenuous outdoor physical exertion"] },
+    veryunhealthy: { h: "VERY UNHEALTHY", r: "(201 - 300)", c: "#f28b3c", t: "#fbd9bf",
+                 rows: ["<b>AVOID</b> prolonged or strenuous outdoor physical exertion",
+                        "<b>MINIMISE</b> outdoor activities",
+                        "<b>AVOID</b> outdoor activities"] },
+    hazardous: { h: "HAZARDOUS", r: "(>300)", c: "#d8352d", t: "#f6cfcc",
+                 rows: ["<b>MINIMISE</b> outdoor activities", "<b>AVOID</b> outdoor activities", "<b>AVOID</b> outdoor activities"] }
+  };
+  function renderAdvisory(d) {
+    var el = document.getElementById("adv"), k = bandKey(d.high);
+    var a = ADV[k === "moderate" ? "good" : k];
+    el.style.setProperty("--ac", a.c); el.style.setProperty("--at", a.t);
+    el.innerHTML = '<p class="ah">' + a.h + '<small>' + a.r + '</small></p>' +
+      a.rows.map(function (r, i) { return '<p class="ab"><span class="who">' + WHO[i] + '</span>' + r + '</p>'; }).join("");
+  }
+
   function renderForecast(d) {
     renderDecision(d);
     var box = document.getElementById("forecast");
@@ -415,7 +449,7 @@
     s += '<path d="' + ring(lo, hi, R + 2, R + 17) + '" fill="#e3e3e3"/>';                 // grey outer band
     s += '<path d="' + ring(lo, hi, RI, R) + '" fill="#000" fill-opacity=".16"/>';          // darkened selected range
     segs.forEach(function (g, i) {
-      s += '<text font-size="9" font-weight="700" fill="' + g[4] + '" dy="3.2"><textPath href="#gp' + i + '" startOffset="50%" text-anchor="middle">' + g[3] + '</textPath></text>';
+      s += '<text font-size="' + (i === 0 ? 8.5 : 10.5) + '" font-weight="700" fill="' + g[4] + '" dy="3.4"><textPath href="#gp' + i + '" startOffset="50%" text-anchor="middle">' + g[3] + '</textPath></text>';
     });
     [lo, hi].forEach(function (v) {                                                         // dotted guide lines
       var a = pt(R + 17, v), b = pt(44, v);
@@ -423,14 +457,15 @@
     });
     [[0, "start", -2, 12], [100, "end", -6, -2], [200, "middle", 0, -6], [300, "start", 6, -2]].forEach(function (t) {
       var p = pt(R + 22, t[0]); if (t[0] === 0) p = [CX - R + 4, CY + 14];
-      s += '<text x="' + f1(p[0] + (t[0] === 0 ? 0 : t[2])) + '" y="' + f1(t[0] === 0 ? p[1] : p[1] + t[3]) + '" font-size="11" text-anchor="' + (t[0] === 0 ? "middle" : t[1]) + '" fill="#14171a">' + t[0] + '</text>';
+      s += '<text x="' + f1(p[0] + (t[0] === 0 ? 0 : t[2])) + '" y="' + f1(t[0] === 0 ? p[1] : p[1] + t[3]) + '" font-size="14" text-anchor="' + (t[0] === 0 ? "middle" : t[1]) + '" fill="#14171a">' + t[0] + '</text>';
     });
-    var pw = 112, ph = 30, px = CX - pw / 2, py = CY - 40;                                 // two-tone range pill
+    var pw = 126, ph = 30, px = CX - pw / 2, py = CY - 40;                                 // two-tone range pill
     s += '<clipPath id="pillclip"><rect x="' + px + '" y="' + py + '" width="' + pw + '" height="' + ph + '" rx="15"/></clipPath>';
     s += '<g clip-path="url(#pillclip)"><rect x="' + px + '" y="' + py + '" width="' + pw / 2 + '" height="' + ph + '" fill="' + gcol(lo) + '"/>' +
          '<rect x="' + (px + pw / 2) + '" y="' + py + '" width="' + pw / 2 + '" height="' + ph + '" fill="' + gcol(hi) + '"/></g>';
-    s += '<text x="' + CX + '" y="' + (py + 21) + '" font-size="19" font-weight="800" text-anchor="middle" fill="#14171a">' + lo + ' - ' + hi + '</text>';
-    s += '<text x="' + CX + '" y="' + (CY + 20) + '" font-size="12" text-anchor="middle" fill="#14171a">PSI Forecast for ' + fmtDay(d.forecast_date) + '</text>';
+    s += '<text x="' + CX + '" y="' + (py + 21) + '" font-size="22" font-weight="800" text-anchor="middle" fill="#14171a">' + lo + ' - ' + hi + '</text>';
+    s += '<text x="' + CX + '" y="' + (CY + 20) + '" font-size="14" text-anchor="middle" fill="#14171a">PSI Forecast for ' + fmtDay(d.forecast_date) + '</text>';
+    renderAdvisory(d);
     var g = document.getElementById("gauge");
     g.innerHTML = s;
     g.setAttribute("aria-label", "PSI forecast for " + fmtDay(d.forecast_date) + ": " + lo + " to " + hi + ", " + (d.band_low === d.band_high ? d.band_low : d.band_low + " to " + d.band_high));
