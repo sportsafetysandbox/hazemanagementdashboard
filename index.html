@@ -192,7 +192,7 @@
   </section>
 
   <section class="forecast" id="forecast" hidden aria-label="PSI forecast for next day">
-    <h2>PSI FORECAST FOR NEXT DAY</h2>
+    <h2 id="fch">PSI Forecast for Next Day</h2>
     <div class="fcrow">
       <svg id="gauge" viewBox="0 0 300 202" role="img" aria-label="PSI forecast gauge"></svg>
       <div class="adv" id="adv" aria-label="Health advisory for the higher forecast band"></div>
@@ -200,8 +200,8 @@
     <p class="note" id="fnote" hidden></p>
   </section>
 
-  <section class="decision" id="decision" hidden aria-label="Island-wide next-day decisions">
-    <h2>Island-Wide Next-Day Decisions</h2>
+  <section class="decision" id="decision" hidden aria-label="Next-day planning guidance">
+    <h2>Next-Day Planning Guidance</h2>
     <p class="dbasis" id="dbasis"></p>
     <div class="dcards">
       <div class="dcard" id="dout"><h3>Outdoor Activities</h3><p></p></div>
@@ -306,6 +306,10 @@
     var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ""); if (!m) return "";
     return parseInt(m[3], 10) + " " + ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][parseInt(m[2], 10) - 1];
   }
+  function fmtDayYear(iso) {
+    var m = /^(\d{4})-/.exec(iso || ""); var d = fmtDay(iso);
+    return d && m ? d + " " + m[1] : d;
+  }
   function todaySGT() {
     var p = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Singapore", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
     return p; // YYYY-MM-DD
@@ -332,8 +336,7 @@
     if (!d || !isNum(d.high)) { box.hidden = true; return; }
     var b = DECISIONS[bandKey(d.high)];                       // higher band of the forecast range
     box.style.setProperty("--c", b.c); box.style.setProperty("--t", b.t); box.style.setProperty("--ct", b.ct);
-    document.getElementById("dbasis").innerHTML = "Based on the higher band of the 24-hr PSI forecast for " + fmtDay(d.forecast_date) +
-      " (" + d.low + " - " + d.high + "): <span class=\"dchip\">" + b.name.toUpperCase() + " (" + b.range + ")</span>";
+    document.getElementById("dbasis").innerHTML = "Based on higher band of Forecast: <span class=\"dchip\">" + b.name.toUpperCase() + " (" + b.range + ")</span>";
     document.querySelector("#dout p").innerHTML = b.outdoor;
     document.getElementById("dfoot").hidden = !b.footnote;
     box.hidden = false;
@@ -463,6 +466,7 @@
     s += '<text x="' + CX + '" y="' + (py + 21) + '" font-size="22" font-weight="800" text-anchor="middle" fill="#14171a">' + lo + ' - ' + hi + '</text>';
     s += '<text x="' + CX + '" y="' + (CY + 20) + '" font-size="14" text-anchor="middle" fill="#14171a">PSI Forecast for ' + fmtDay(d.forecast_date) + '</text>';
     renderAdvisory(d);
+    document.getElementById("fch").textContent = "PSI Forecast for " + (fmtDayYear(d.forecast_date) || "Next Day");
     var g = document.getElementById("gauge");
     g.innerHTML = s;
     g.setAttribute("aria-label", "PSI forecast for " + fmtDay(d.forecast_date) + ": " + lo + " to " + hi + ", " + (d.band_low === d.band_high ? d.band_low : d.band_low + " to " + d.band_high));
