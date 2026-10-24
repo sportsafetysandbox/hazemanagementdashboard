@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
-<title>Sport Activity &amp; Facility Guide</title>
+<title>Sport Activity Guidance during Haze</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
@@ -34,8 +34,9 @@
     margin: calc(-1 * max(10px, env(safe-area-inset-top))) -16px 18px;
     padding: max(12px, env(safe-area-inset-top)) 16px 10px;
   }
-  .hdr h1 { font-size: clamp(18px, 5.6vw, 24px); line-height: 1.15; margin: 0; letter-spacing: -.3px; color: #fff; font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-weight: 800; }
-  .hdr .asat { margin: 5px 0 0; text-align: left; font-size: 12px; font-weight: 600; color: rgba(255,255,255,.92); font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .hdr h1 { font-size: 20px; line-height: 1.15; margin: 0; letter-spacing: -.2px; color: #fff; text-align: center; white-space: nowrap; font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-weight: 800; }
+  .hdr .sub { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 6px 0 0; white-space: nowrap; font-size: 11px; font-weight: 600; color: rgba(255,255,255,.92); font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .hdr .sub span { white-space: nowrap; }
   .banner {
     background: #fff4d6; border: 1px solid #f0d27a; color: #6b5200;
     border-radius: 8px; padding: 6px 9px; font-size: 12px; margin: 0 0 6px;
@@ -173,8 +174,8 @@
 </head>
 <body>
   <header class="hdr">
-    <h1>Sport Activity &amp; Facility Guide</h1>
-    <p class="asat" id="asat">Loading…</p>
+    <h1 id="htitle">Sport Activity Guidance during Haze</h1>
+    <div class="sub" id="hsub"><span id="asat">Loading…</span><span>Developed by: Raihan Husainni</span></div>
   </header>
   <div class="banner" id="banner" hidden></div>
 
@@ -270,6 +271,20 @@
     return hhmm + "hrs, " + o.day + " " + o.month + " " + o.year;
   }
 
+  /* ---------- header: keep title and sub-header on a single line on any screen ---------- */
+  function fitOne(el, max, min) {
+    if (!el) return;
+    var sz = max; el.style.fontSize = sz + "px";
+    while (el.scrollWidth > el.clientWidth + 0.5 && sz > min) { sz -= 0.25; el.style.fontSize = sz + "px"; }
+  }
+  function fitHeader() {
+    fitOne(document.getElementById("htitle"), 22, 9);
+    fitOne(document.getElementById("hsub"), 11.5, 6);
+  }
+  window.addEventListener("resize", fitHeader);
+  window.addEventListener("load", fitHeader);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHeader);
+
   /* ---------- chart tooltip: last 6 hourly readings of a pill ---------- */
   var BAND_HEX = { green: "#5ba85a", yellow: "#f6c61b", orange: "#f28b3c", red: "#d8352d" };
   var REGION_NAME = { north: "North", west: "West", central: "Central", east: "East", south: "South" };
@@ -351,6 +366,7 @@
 
     var stamp = pm.timestamp || psi.timestamp || data.fetched_at;
     document.getElementById("asat").textContent = fmtAsAt(stamp) ? "Updated as at " + fmtAsAt(stamp) : "Latest reading";
+    fitHeader();
 
     var msgs = [];
     if (data.sample) msgs.push("Showing sample data. Live readings appear after the first scheduled update runs.");
