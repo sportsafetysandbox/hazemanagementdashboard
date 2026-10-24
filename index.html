@@ -464,7 +464,7 @@
     s += '<g clip-path="url(#pillclip)"><rect x="' + px + '" y="' + py + '" width="' + pw / 2 + '" height="' + ph + '" fill="' + gcol(lo) + '"/>' +
          '<rect x="' + (px + pw / 2) + '" y="' + py + '" width="' + pw / 2 + '" height="' + ph + '" fill="' + gcol(hi) + '"/></g>';
     s += '<text x="' + CX + '" y="' + (py + 21) + '" font-size="22" font-weight="800" text-anchor="middle" fill="#14171a">' + lo + ' - ' + hi + '</text>';
-    s += '<text x="' + CX + '" y="' + (CY + 20) + '" font-size="14" text-anchor="middle" fill="#14171a">PSI Forecast for ' + fmtDay(d.forecast_date) + '</text>';
+    s += '<text x="' + CX + '" y="' + (CY + 20) + '" font-size="14" text-anchor="middle" fill="#14171a">24-hour PSI Forecast Range</text>';
     renderAdvisory(d);
     document.getElementById("fch").textContent = "PSI Forecast for " + (fmtDayYear(d.forecast_date) || "Next Day");
     var g = document.getElementById("gauge");
