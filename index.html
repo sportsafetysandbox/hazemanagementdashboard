@@ -64,6 +64,9 @@
     height: 24px; border-radius: 2px; font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums;
     background: #ccc; color: var(--ink); letter-spacing: -.3px;
   }
+  @media (max-width: 340px) { .pill { font-size: 12.5px; letter-spacing: -.6px; } .pill .arr { font-size: .75em; margin-right: 0; } }
+  .cols > * { min-width: 0; }
+  .pill .arr { font-size: .8em; font-weight: 800; margin-right: 1px; line-height: 1; }
   .pill.green  { background: var(--green);  color: #fff; }
   .pill.blue   { background: var(--blue);   color: #fff; }
   .pill.yellow { background: var(--yellow); color: var(--ink); }
@@ -239,9 +242,10 @@
 
   function isNum(v) { return typeof v === "number" && isFinite(v); }
 
-  function pill(v, bandFn) {
+  function pill(v, bandFn, trend) {
+    var arrow = trend === "up" ? '<span class="arr" aria-label="rising">\u2191</span>' : trend === "down" ? '<span class="arr" aria-label="falling">\u2193</span>' : "";
     return isNum(v)
-      ? '<div class="pill ' + bandFn(v) + '">' + Math.round(v) + '</div>'
+      ? '<div class="pill ' + bandFn(v) + '">' + arrow + Math.round(v) + '</div>'
       : '<div class="pill na">–</div>';
   }
 
@@ -262,8 +266,8 @@
       var k = r[0], pv = pm[k], sv = psi[k];
       var hdr = isNum(pv) ? pm25Band(pv) : (isNum(sv) ? psiBand(sv) : "");
       html += '<div class="card ' + k + " " + hdr + '"><h2>' + r[1] + '</h2><div class="cols">' +
-        '<div class="col"><div class="lbl">1-hour<br>PM2.5</div>' + pill(pv, pm25Band) + '</div>' +
-        '<div class="col"><div class="lbl">24-hour<br>PSI</div>' + pill(sv, psiBand) + '</div>' +
+        '<div class="col"><div class="lbl">1-hour<br>PM2.5</div>' + pill(pv, pm25Band, (pm.trend || {})[k]) + '</div>' +
+        '<div class="col"><div class="lbl">24-hour<br>PSI</div>' + pill(sv, psiBand, (psi.trend || {})[k]) + '</div>' +
         '</div></div>';
     });
     var map = document.getElementById("map");
