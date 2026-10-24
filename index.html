@@ -182,9 +182,8 @@
     </div>
     <div class="row">
       <div class="name">24-hour PSI</div>
-      <div class="bar b5">
-        <div class="seg"><span>Good</span><i class="g">0–50</i></div>
-        <div class="seg"><span>Moderate</span><i class="b">51–100</i></div>
+      <div class="bar b4">
+        <div class="seg"><span>Good - Moderate</span><i class="g">0–100</i></div>
         <div class="seg"><span>Unhealthy</span><i class="y dark">101–200</i></div>
         <div class="seg"><span>Very unhealthy</span><i class="o">201–300</i></div>
         <div class="seg"><span>Hazardous</span><i class="r">&gt;300</i></div>
@@ -234,7 +233,7 @@
   var REGIONS = [["north", "NORTH"], ["west", "WEST"], ["central", "CENTRAL"], ["east", "EAST"], ["south", "SOUTH"]];
 
   function pm25Band(v) { return v <= 55 ? "green" : v <= 150 ? "yellow" : v <= 250 ? "orange" : "red"; }
-  function psiBand(v)  { return v <= 50 ? "green" : v <= 100 ? "blue" : v <= 200 ? "yellow" : v <= 300 ? "orange" : "red"; }
+  function psiBand(v)  { return v <= 100 ? "green" : v <= 200 ? "yellow" : v <= 300 ? "orange" : "red"; }
 
   function isNum(v) { return typeof v === "number" && isFinite(v); }
 
@@ -316,9 +315,7 @@
   var PROCEED = "<b>To proceed</b> as planned";
   var CANCEL_ALL = '<span class="stop">To Cancel, or Postpone all Organised Activities</span>';
   var DECISIONS = {
-    good:      { name: "Good",           range: "0–50",    c: "#5ba85a", t: "#e3f1e2", ct: "#fff",
-                 outdoor: PROCEED, aircon: PROCEED },
-    moderate:  { name: "Moderate",       range: "51–100",  c: "#3f7fd6", t: "#dfeaf9", ct: "#fff",
+    good:      { name: "Good - Moderate", range: "0–100",   c: "#5ba85a", t: "#e3f1e2", ct: "#fff",
                  outdoor: PROCEED, aircon: PROCEED },
     unhealthy: { name: "Unhealthy",      range: "101–200", c: "#f6c61b", t: "#fcf0b8", ct: "#14171a",
                  outdoor: "<b>To modify</b> Intensity of Organised Activities<br><br>For Organised Activities that cannot be modified<sup>1</sup>:<br>" +
@@ -329,7 +326,7 @@
     hazardous: { name: "Hazardous",      range: ">300",    c: "#d8352d", t: "#f6cfcc", ct: "#fff",
                  outdoor: CANCEL_ALL, aircon: CANCEL_ALL }
   };
-  function bandKey(v) { return v <= 50 ? "good" : v <= 100 ? "moderate" : v <= 200 ? "unhealthy" : v <= 300 ? "veryunhealthy" : "hazardous"; }
+  function bandKey(v) { return v <= 100 ? "good" : v <= 200 ? "unhealthy" : v <= 300 ? "veryunhealthy" : "hazardous"; }
   function renderDecision(d) {
     var box = document.getElementById("decision");
     if (!d || !isNum(d.high)) { box.hidden = true; return; }
@@ -429,7 +426,7 @@
   };
   function renderAdvisory(d) {
     var el = document.getElementById("adv"), k = bandKey(d.high);
-    var a = ADV[k === "moderate" ? "good" : k];
+    var a = ADV[k];
     el.style.setProperty("--ac", a.c); el.style.setProperty("--at", a.t);
     el.innerHTML = '<p class="ah">' + a.h + '<small>' + a.r + '</small></p>' +
       a.rows.map(function (r, i) { return '<p class="ab"><span class="who">' + WHO[i] + '</span>' + r + '</p>'; }).join("");
