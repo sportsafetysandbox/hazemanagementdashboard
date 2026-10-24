@@ -1,10 +1,10 @@
 {
   "result": "stored",
-  "html_bytes": 67675,
+  "html_bytes": 67937,
   "imgs": [
     "<img src=\"/assets/images/design/logo.png\" alt=\"National Environment Agency\">",
-    "<img src=\"/images/default-source/health-advisory-images/psi-header_2026-10-24.png\" style=\"display:block;width:100%;height:auto;border:0;\" alt=\"PSI Forecast Header\" />",
-    "<img src=\"/images/default-source/health-advisory-images/psi-forecast_2026-10-24.png\" style=\"display:inline-block;max-width:100%;height:auto;border:0;\" alt=\"PSI Gauge\" />",
+    "<img src=\"/images/default-source/health-advisory-images/psi-header_2026-10-25.png\" style=\"display:block;width:100%;height:auto;border:0;\" alt=\"PSI Forecast Header\" />",
+    "<img src=\"/images/default-source/health-advisory-images/psi-forecast_2026-10-25.png\" style=\"display:inline-block;max-width:100%;height:auto;border:0;\" alt=\"PSI Gauge\" />",
     "<img src=\"/images/default-source/health-advisory-images/unhealthy_2026-10-24.png\" style=\"display:inline-block;max-width:100%;height:auto;border:0;\" alt=\"Health Advisory Table\" />",
     "<img src=\"/assets/images/map/map.png\" alt=\"map\">",
     "<img src=\"/assets/images/map/map.png\" alt=\"map\">",
@@ -15,11 +15,11 @@
     "<img alt=\"wind speed legend\" src=\"/assets/images/legend-wind-speed.jpg\" />",
     "<img src=\"/images/default-source/health-advisory-images/haze-pm-psi-guide-a4-yoca-english_18-oct.jpg\" alt=\"NEA PSI Poster\">"
   ],
-  "attempted_at": "2026-10-23T23:04:58+08:00",
-  "gauge_url": "https://www.haze.gov.sg/images/default-source/health-advisory-images/psi-forecast_2026-10-24.png",
-  "header_url": "https://www.haze.gov.sg/images/default-source/health-advisory-images/psi-header_2026-10-24.png",
-  "image_bytes": 60508,
-  "forecast_date": "2026-10-24",
-  "lo": 90,
-  "hi": 140
+  "attempted_at": "2026-10-24T18:17:08+08:00",
+  "gauge_url": "https://www.haze.gov.sg/images/default-source/health-advisory-images/psi-forecast_2026-10-25.png",
+  "header_url": "https://www.haze.gov.sg/images/default-source/health-advisory-images/psi-header_2026-10-25.png",
+  "image_bytes": 72663,
+  "forecast_date": "2026-10-25",
+  "lo": 80,
+  "hi": 130
 }
