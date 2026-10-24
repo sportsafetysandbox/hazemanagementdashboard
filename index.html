@@ -66,6 +66,14 @@
   }
   @media (max-width: 340px) { .pill { font-size: 12.5px; letter-spacing: -.6px; } .pill .arr { font-size: .75em; margin-right: 0; } }
   .cols > * { min-width: 0; }
+  .pill[data-kind] { cursor: pointer; }
+  .pill:focus-visible { outline: 2px solid #14171a; outline-offset: 1px; }
+  #tip { position: fixed; z-index: 50; width: 236px; max-width: calc(100vw - 16px); background: #fff; color: #14171a; border: 1px solid #c9cdd1;
+         border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.25); padding: 7px 8px 6px; font-size: 11px; line-height: 1.3; pointer-events: none; }
+  #tip[hidden] { display: none; }
+  #tip .tt { font-weight: 800; font-size: 11.5px; }
+  #tip .ts { color: var(--muted); font-size: 10px; margin-bottom: 2px; }
+  #tip svg { display: block; width: 100%; height: auto; }
   .pill .arr { font-size: .8em; font-weight: 800; margin-right: 1px; line-height: 1; }
   .pill.green  { background: var(--green);  color: #fff; }
   .pill.blue   { background: var(--blue);   color: #fff; }
@@ -223,6 +231,8 @@
     <p class="rfoot" id="rfoot" hidden></p>
   </section>
 
+  <div id="tip" role="tooltip" hidden></div>
+
   <footer>
     <div>Source: National Environment Agency via data.gov.sg</div>
     <div id="meta"></div>
@@ -242,10 +252,10 @@
 
   function isNum(v) { return typeof v === "number" && isFinite(v); }
 
-  function pill(v, bandFn, trend) {
+  function pill(v, bandFn, trend, kind, region) {
     var arrow = trend === "up" ? '<span class="arr" aria-label="rising">\u2191</span>' : trend === "down" ? '<span class="arr" aria-label="falling">\u2193</span>' : "";
     return isNum(v)
-      ? '<div class="pill ' + bandFn(v) + '">' + arrow + Math.round(v) + '</div>'
+      ? '<div class="pill ' + bandFn(v) + '" tabindex="0" role="button" data-kind="' + (kind || "") + '" data-region="' + (region || "") + '" aria-label="' + (region || "") + " " + (kind === "psi" ? "24-hour PSI" : "1-hour PM2.5") + " " + Math.round(v) + ', press for the last 6 hours">' + arrow + Math.round(v) + '</div>'
       : '<div class="pill na">–</div>';
   }
 
@@ -258,6 +268,68 @@
     return hhmm + "hrs, " + o.day + " " + o.month + " " + o.year;
   }
 
+  /* ---------- chart tooltip: last 6 hourly readings of a pill ---------- */
+  var BAND_HEX = { green: "#5ba85a", yellow: "#f6c61b", orange: "#f28b3c", red: "#d8352d" };
+  var REGION_NAME = { north: "North", west: "West", central: "Central", east: "East", south: "South" };
+  function hourLbl(iso) {
+    var p = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Singapore", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(iso));
+    return p.replace(":", "");
+  }
+  function chartSvg(vals, stamps, bandFn) {
+    var W = 236, H = 118, L = 14, R = 14, T = 20, B = 22, n = vals.length;
+    var nums = vals.filter(isNum), lo = Math.min.apply(null, nums), hi = Math.max.apply(null, nums);
+    if (lo === hi) { lo -= 5; hi += 5; } else { var pad = (hi - lo) * 0.2; lo -= pad; hi += pad; }
+    function X(i) { return L + (W - L - R) * i / (n - 1); }
+    function Y(v) { return T + (H - T - B) * (1 - (v - lo) / (hi - lo)); }
+    var s = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Last 6 hourly readings">';
+    s += '<line x1="' + L + '" y1="' + (H - B) + '" x2="' + (W - R) + '" y2="' + (H - B) + '" stroke="#d3d7da"/>';
+    var d = "", pen = false;
+    vals.forEach(function (v, i) { if (!isNum(v)) { pen = false; return; } d += (pen ? "L" : "M") + X(i).toFixed(1) + " " + Y(v).toFixed(1) + " "; pen = true; });
+    s += '<path d="' + d + '" fill="none" stroke="#5d656d" stroke-width="1.5" stroke-linejoin="round"/>';
+    vals.forEach(function (v, i) {
+      var last = i === n - 1;
+      if (isNum(v)) {
+        s += '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(v).toFixed(1) + '" r="' + (last ? 5 : 3.6) + '" fill="' + BAND_HEX[bandFn(v)] + '" stroke="#14171a" stroke-width="' + (last ? 1.6 : 1) + '"/>';
+        s += '<text x="' + X(i).toFixed(1) + '" y="' + (Y(v) - 8).toFixed(1) + '" font-size="9.5" font-weight="' + (last ? 800 : 600) + '" text-anchor="middle" fill="#14171a">' + Math.round(v) + '</text>';
+      }
+      s += '<text x="' + X(i).toFixed(1) + '" y="' + (H - 7) + '" font-size="8.5" text-anchor="middle" fill="#5d656d">' + hourLbl(stamps[i]) + '</text>';
+    });
+    return s + "</svg>";
+  }
+  var tipFor = null;
+  function hideTip() { var t = document.getElementById("tip"); if (t) t.hidden = true; tipFor = null; }
+  function showTip(pill) {
+    var kind = pill.dataset.kind, reg = pill.dataset.region, tip = document.getElementById("tip");
+    var src = lastData && lastData[kind === "psi" ? "psi_24hr" : "pm25_1hr"], h = src && src.history;
+    var vals = h && h[reg], stamps = h && h.timestamps;
+    if (!vals || !stamps || !vals.some(isNum)) { hideTip(); return; }
+    tip.innerHTML = '<div class="tt">' + REGION_NAME[reg] + " · " + (kind === "psi" ? "24-hour PSI" : "1-hour PM2.5") + '</div>' +
+      '<div class="ts">Last 6 hours</div>' + chartSvg(vals, stamps, kind === "psi" ? psiBand : pm25Band);
+    tip.hidden = false; tipFor = pill;
+    var r = pill.getBoundingClientRect(), tw = tip.offsetWidth, th = tip.offsetHeight, vw = document.documentElement.clientWidth;
+    var left = Math.min(Math.max(8, r.left + r.width / 2 - tw / 2), vw - tw - 8);
+    var top = r.top - th - 8; if (top < 8) top = r.bottom + 8;
+    tip.style.left = left + "px"; tip.style.top = top + "px";
+  }
+  (function wireTips() {
+    var map = document.getElementById("map"), lastType = "mouse";
+    function pillOf(e) { return e.target.closest && e.target.closest(".pill[data-kind]"); }
+    map.addEventListener("pointerdown", function (e) { lastType = e.pointerType || "mouse"; }, true);
+    map.addEventListener("pointerover", function (e) { var p = pillOf(e); if (p && e.pointerType === "mouse") showTip(p); });
+    map.addEventListener("pointerout", function (e) { if (pillOf(e) && e.pointerType === "mouse") hideTip(); });
+    map.addEventListener("focusin", function (e) { var p = pillOf(e); if (p && lastType === "keyboard") showTip(p); });
+    map.addEventListener("focusout", hideTip);
+    map.addEventListener("keydown", function (e) { lastType = "keyboard"; var p = pillOf(e); if (p && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); showTip(p); } });
+    map.addEventListener("click", function (e) {      // tap / click: toggle (touch) or show (mouse)
+      var p = pillOf(e); if (!p) return;
+      if (tipFor === p && lastType !== "mouse") hideTip(); else showTip(p);
+      e.stopPropagation();
+    });
+    document.addEventListener("click", function (e) { if (!pillOf(e)) hideTip(); });
+    window.addEventListener("scroll", hideTip, { passive: true });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") hideTip(); });
+  })();
+
   function render(data) {
     renderRegional(data);
     var pm = data.pm25_1hr || {}, psi = data.psi_24hr || {};
@@ -266,11 +338,12 @@
       var k = r[0], pv = pm[k], sv = psi[k];
       var hdr = isNum(pv) ? pm25Band(pv) : (isNum(sv) ? psiBand(sv) : "");
       html += '<div class="card ' + k + " " + hdr + '"><h2>' + r[1] + '</h2><div class="cols">' +
-        '<div class="col"><div class="lbl">1-hour<br>PM2.5</div>' + pill(pv, pm25Band, (pm.trend || {})[k]) + '</div>' +
-        '<div class="col"><div class="lbl">24-hour<br>PSI</div>' + pill(sv, psiBand, (psi.trend || {})[k]) + '</div>' +
+        '<div class="col"><div class="lbl">1-hour<br>PM2.5</div>' + pill(pv, pm25Band, (pm.trend || {})[k], "pm25", k) + '</div>' +
+        '<div class="col"><div class="lbl">24-hour<br>PSI</div>' + pill(sv, psiBand, (psi.trend || {})[k], "psi", k) + '</div>' +
         '</div></div>';
     });
     var map = document.getElementById("map");
+    hideTip();
     map.querySelectorAll(".card").forEach(function (n) { n.remove(); });
     map.insertAdjacentHTML("beforeend", html);
 

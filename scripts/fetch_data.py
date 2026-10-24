@@ -103,33 +103,48 @@ def append_row(name, fetched_at, ts, values):
         w.writerows(rows)
 
 
-def compute_trend(name, latest_ts):
-    """Per region: "up" if the last two hourly changes were both rises (t-2h < t-1h < now),
-    "down" if both were drops, otherwise "flat". Needs three consecutive hourly readings."""
-    out = {r: "flat" for r in REGIONS}
-    try:
-        by_ts = {}
-        with (DATA / f"{name}.csv").open(newline="") as f:
-            for row in list(csv.reader(f))[1:]:
-                if len(row) >= 7:
-                    by_ts[row[1]] = row[2:7]          # later rows win
-        now = datetime.fromisoformat(latest_ts)
-        keys = []
-        for back in (2, 1, 0):
-            want = (now - timedelta(hours=back)).astimezone(SGT).isoformat(timespec="seconds")
-            match = next((k for k in by_ts if datetime.fromisoformat(k) == datetime.fromisoformat(want)), None)
-            if match is None:
-                return out                              # a missing hour: no trend
-            keys.append(match)
-        for i, r in enumerate(REGIONS):
+def hourly_series(name, latest_ts, hours=6):
+    """The last `hours` hourly readings ending at latest_ts, oldest first.
+    Returns [(iso_timestamp, [5 region values or None])]; a missing hour has all None."""
+    by_ts = {}
+    with (DATA / f"{name}.csv").open(newline="") as f:
+        for row in list(csv.reader(f))[1:]:
+            if len(row) >= 7:
+                try:
+                    by_ts[datetime.fromisoformat(row[1])] = row[2:7]   # later rows win
+                except ValueError:
+                    pass
+    now = datetime.fromisoformat(latest_ts)
+    out = []
+    for back in range(hours - 1, -1, -1):
+        t = now - timedelta(hours=back)
+        vals = []
+        for v in by_ts.get(t, [None] * 5):
             try:
-                a, b, c = (float(by_ts[k][i]) for k in keys)
-            except ValueError:
-                continue
-            out[r] = "up" if a < b < c else "down" if a > b > c else "flat"
-    except Exception as e:  # noqa: BLE001
-        print(f"trend unavailable: {e}", file=sys.stderr)
+                vals.append(float(v))
+            except (TypeError, ValueError):
+                vals.append(None)
+        out.append((t.astimezone(SGT).isoformat(timespec="seconds"), vals))
     return out
+
+
+def trend_and_history(name, latest_ts):
+    """trend: per region "up" if the last two hourly changes were both rises (t-2h < t-1h < now),
+    "down" if both were drops, else "flat" (also when an hour is missing).
+    history: the last 6 hourly readings per region, for the chart tooltip."""
+    trend = {r: "flat" for r in REGIONS}
+    history = {"timestamps": [], **{r: [] for r in REGIONS}}
+    try:
+        series = hourly_series(name, latest_ts, 6)
+        history["timestamps"] = [t for t, _ in series]
+        for i, r in enumerate(REGIONS):
+            history[r] = [None if v[i] is None else int(round(v[i])) for _, v in series]
+            a, b, c = (history[r][k] for k in (-3, -2, -1))
+            if None not in (a, b, c):
+                trend[r] = "up" if a < b < c else "down" if a > b > c else "flat"
+    except Exception as e:  # noqa: BLE001
+        print(f"trend/history unavailable: {e}", file=sys.stderr)
+    return trend, history
 
 
 def main():
@@ -153,7 +168,8 @@ def main():
             print(f"[{name}] FAILED: {e}", file=sys.stderr)
             continue
         append_row(name, now, ts, values)
-        latest[name] = {"timestamp": ts, **values, "trend": compute_trend(name, ts)}
+        trend, history = trend_and_history(name, ts)
+        latest[name] = {"timestamp": ts, **values, "trend": trend, "history": history}
         print(f"[{name}] {ts} {values}")
 
     if failures < len(SOURCES):
