@@ -121,6 +121,7 @@
   .dcard h3 { margin: 0 0 3px; font-size: 12px; letter-spacing: .2px; }
   .dcard p { margin: 0; font-size: 13px; line-height: 1.35; }
   .dcard .stop { color: #c00000; font-weight: 800; }
+  .dcard .fn { display: block; font-size: 10.5px; font-style: italic; line-height: 1.3; margin-top: 8px; }
   .dfoot { font-size: 10.5px; line-height: 1.4; color: var(--muted); margin: 8px 0 0; }
   .dfoot[hidden] { display: none; }
   /* Regional hourly decisions (Outdoor Activities) */
@@ -205,7 +206,7 @@
     <h2>Next-Day Planning Guidance</h2>
     <p class="dbasis" id="dbasis"></p>
     <div class="dcards">
-      <div class="dcard" id="dout"><h3>Outdoor Activities</h3><p></p></div>
+      <div class="dcard" id="dout"><h3>For Organised Outdoor Activities</h3><p></p></div>
     </div>
     <p class="dfoot" id="dfoot" hidden><sup>1</sup> <b>Activities that cannot be modified</b>, refers to activities that are <b>strenuous and/or prolonged</b> in nature and cannot be modified. e.g., Competitions, Endurance Races, Fitness &amp; Proficiency Assessments.</p>
   </section>
@@ -317,15 +318,16 @@
   }
   /* ---------- Decision matrix for next-day activities (SportSG) ----------
      The decision is taken from the HIGHER band of the 24-hr PSI forecast range. */
-  var PROCEED = "<b>To proceed</b> as planned";
-  var CANCEL_ALL = '<span class="stop">To Cancel, or Postpone all Organised Activities</span>';
+  var PROCEED = "<b>Continue</b> Activities as planned";
+  var CANCEL_ALL = '<span class="stop">Cancel, or Postpone all Organised Activities</span>';
   var DECISIONS = {
     good:      { name: "Good - Moderate", range: "0–100",   c: "#5ba85a", t: "#e3f1e2", ct: "#fff",
                  outdoor: PROCEED, aircon: PROCEED },
     unhealthy: { name: "Unhealthy",      range: "101–200", c: "#f6c61b", t: "#fcf0b8", ct: "#14171a",
-                 outdoor: "<b>To modify</b> Intensity of Organised Activities<br><br>For Organised Activities that cannot be modified<sup>1</sup>:<br>" +
-                          '<span class="stop">To Cancel, or Postpone</span>',
-                 aircon: PROCEED, footnote: true },
+                 outdoor: "<b>Reduce</b> Intensity &amp; Duration of Activities, and institute more Rest and Hydration Breaks.<br><br>" +
+                          '<span class="stop">Cancel or Postpone</span> Strenuous Activities*.' +
+                          '<span class="fn">*Strenuous Activities include Competitions, Races, Fitness-intensive Assessments.</span>',
+                 aircon: PROCEED },
     veryunhealthy: { name: "Very Unhealthy", range: "201–300", c: "#f28b3c", t: "#fbd9bf", ct: "#14171a",
                  outdoor: CANCEL_ALL, aircon: PROCEED },
     hazardous: { name: "Hazardous",      range: ">300",    c: "#d8352d", t: "#f6cfcc", ct: "#fff",
