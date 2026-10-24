@@ -150,8 +150,9 @@
   .rfac li { padding: 6px 9px; font-size: 12.5px; line-height: 1.3; background: rgba(255,255,255,.62); }
   .rfac li:nth-child(even) { background: rgba(255,255,255,.3); }
   .rfoot { font-size: 10.5px; line-height: 1.4; color: var(--muted); margin: 8px 0 0; }
-  .rlbl { font-size: 11px; font-weight: 800; letter-spacing: .2px; margin: 0 0 2px; text-transform: uppercase; color: #33383d; }
+  .rlbl { font-size: 11px; font-weight: 800; letter-spacing: .2px; margin: 0 0 7px; text-transform: uppercase; color: #33383d; }
   .rtxt { margin: 0; font-size: 13px; line-height: 1.35; }
+  .rtxt .fn { display: block; font-size: 10.5px; font-style: italic; line-height: 1.3; margin-top: 8px; }
   .rtxt .stop { color: #c00000; font-weight: 800; }
   footer { color: var(--muted); font-size: 10.5px; margin-top: 2px; line-height: 1.4; }
   footer b { font-weight: 600; }
@@ -210,8 +211,8 @@
   </section>
 
   <section class="regional" id="regional" hidden aria-label="Regional hourly decisions for outdoor activities">
-    <h2>Regional Hourly Decisions</h2>
-    <p class="sub">Outdoor Activities (scheduled to proceed for the day)</p>
+    <h2>Hourly Planning Guidance</h2>
+    <p class="sub">For Outdoor Activities (scheduled to proceed for the day)</p>
     <p class="rbasis" id="rbasis"></p>
     <p class="rnote" id="rnote" hidden></p>
     <div class="rcards" id="rcards"></div>
@@ -347,17 +348,22 @@
   var STOP = function (t) { return '<span class="stop">' + t + '</span>'; };
   var HOURLY = [
     { n: 1, name: "Normal",    range: "0–55",    c: "#5ba85a", t: "#e3f1e2", ct: "#fff",
-      outdoor: "To continue <b>as planned</b>" },
+      outdoor: "<b>Continue</b> Activities as planned" },
     { n: 2, name: "Elevated",  range: "56–150",  c: "#f6c61b", t: "#fcf0b8", ct: "#14171a",
-      outdoor: "<b>To modify Intensity of Organised Activities</b><br><br>For <b>Organised Activities that cannot be modified</b>: " + STOP("To suspend") },
+      outdoor: "<b>Reduce</b> Intensity &amp; Duration of Activities, and institute more Rest and Hydration Breaks.<br><br>" +
+               STOP("Suspend or Cancel") + " on-going Strenuous Activities*.<br><br>" +
+               STOP("Cancel or Postpone") + " Strenuous Activities* scheduled in the next 3hr Window." +
+               '<span class="fn">*Strenuous Activities include Competitions, Races, Fitness-intensive Assessments.</span>' },
     { n: 3, name: "High",      range: "151–250", c: "#f28b3c", t: "#fbd9bf", ct: "#14171a",
-      outdoor: STOP("To suspend") + " on-going <b>Organised Activities</b><br><br>" +
-               STOP("To cancel") + " <b>Organised Activities</b> scheduled in the next 3hr Window<br><br>" +
-               STOP("Strongly Encourage") + " users to avoid Strenuous Activities" },
+      outdoor: STOP("Suspend or Cancel") + " all on-going Activities.<br><br>" +
+               STOP("Cancel or Postpone") + " all Activities scheduled in the next 3hr Window.<br><br>" +
+               STOP("Strongly Advise") + " other sport users to avoid Strenuous Activities" },
     { n: 4, name: "Very High", range: ">250",    c: "#d8352d", t: "#f6cfcc", ct: "#fff",
-      outdoor: STOP("To Cancel,<br>or Postpone all Organised Activities") + "<br><br>" +
-               STOP("Actively Stop") + " users from entering Outdoor and Non-Airconditioned Facilities" }
+      outdoor: STOP("Cancel,<br>or Postpone all Organised Activities") + "<br><br>" +
+               STOP("Temporarily Close<br>Outdoor and Non-Air-conditioned Facilities.") + "<br><br>" +
+               STOP("Prevent") + " users from entering Outdoor and Non-Air-conditioned Facilities." }
   ];
+
   function hourlyBand(v) { return v <= 55 ? HOURLY[0] : v <= 150 ? HOURLY[1] : v <= 250 ? HOURLY[2] : HOURLY[3]; }
   var facilities = null, lastData = null, openFac = {};
   function esc(t) { return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
@@ -396,13 +402,13 @@
         '<div class="rtop"><div><div class="rname">' + r[1] + '</div>' +
         '<div class="rband">Band ' + b.n + ' (' + b.name + ') · ' + b.range + '</div></div>' +
         '<div class="rpm">' + Math.round(v) + '<small>1-hr PM2.5</small></div></div>' +
-        '<div class="rlbl">Outdoor Activities</div><p class="rtxt">' + b.outdoor + '</p>' + facHtml(r[0]) + '</div>';
+        '<div class="rlbl">For Organised Outdoor Activities</div><p class="rtxt">' + b.outdoor + '</p>' + facHtml(r[0]) + '</div>';
     });
     document.getElementById("rcards").innerHTML = html;
     var ff = document.getElementById("rfoot");
-    if (facilities && facilities.updated) { ff.hidden = false; ff.textContent = "Sport centre list (SportSG, Sport Facilities by NEA Region) as at " + fmtAsAt(facilities.updated).replace(/^As at /, "") + "."; } else ff.hidden = true;
+    if (facilities && facilities.updated) { ff.hidden = false; ff.textContent = "Sport Centre list (SportSG, Sport Facilities by NEA Region) as at " + fmtAsAt(facilities.updated).replace(/^As at /, "") + "."; } else ff.hidden = true;
     var when = fmtAsAt(pm.timestamp).replace(/^As at /, "");
-    document.getElementById("rbasis").textContent = "Based on each region's current 1-hr PM2.5 reading" + (when ? " as at " + when + "." : ".");
+    document.getElementById("rbasis").textContent = "Based on each region\u2019s current 1-hr PM2.5 reading" + (when ? " as at " + when + "." : ".");
     var note = document.getElementById("rnote"), msg = "";
     var t = new Date(pm.timestamp);
     if (data.sample) msg = "Sample data only. Do not use these decisions.";
