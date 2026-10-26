@@ -1,10 +1,10 @@
 {
   "result": "error",
-  "html_bytes": 67805,
+  "html_bytes": 67831,
   "imgs": [
     "<img src=\"/assets/images/design/logo.png\" alt=\"National Environment Agency\">",
-    "<img src=\"/images/default-source/health-advisory-images/psi-header_2026-10-26.png\" style=\"display:block;width:100%;height:auto;border:0;\" alt=\"PSI Forecast for planning outdoor activities on 26 October 2026.\" />",
-    "<img src=\"/images/default-source/health-advisory-images/psi-forecast_2026-10-26_70-100.png\" style=\"display:inline-block;max-width:100%;height:auto;border:0;\" alt=\"PSI forecast for 26 October 2026 is 70\u2013100, within the Moderate range.\" />",
+    "<img src=\"/images/default-source/health-advisory-images/psi-header_2026-10-27.png\" style=\"display:block;width:100%;height:auto;border:0;\" alt=\"PSI Forecast for planning outdoor activities on 26 October 2026.\" />",
+    "<img src=\"/images/default-source/health-advisory-images/psi-forecast_2026-10-27.png\" style=\"display:inline-block;max-width:100%;height:auto;border:0;\" alt=\"PSI forecast for 26 October 2026 is 70\u2013100, within the Moderate range.\" />",
     "<img src=\"/images/default-source/health-advisory-images/good-to-moderate_2026-10-26.png\" style=\"display:inline-block;max-width:100%;height:auto;border:0;\" alt=\"Good\u2013Moderate PSI (0\u2013100): Healthy persons, elderly people, pregnant women, children, and persons with chronic lung or heart disease can continue normal activities. Advice is based on the high end of the PSI forecast.\" />",
     "<img src=\"/assets/images/map/map.png\" alt=\"map\">",
     "<img src=\"/assets/images/map/map.png\" alt=\"map\">",
@@ -15,6 +15,6 @@
     "<img alt=\"wind speed legend\" src=\"/assets/images/legend-wind-speed.jpg\" />",
     "<img src=\"/images/default-source/health-advisory-images/haze-pm-psi-guide-a4-yoca-english_18-oct.jpg\" alt=\"NEA PSI Poster\">"
   ],
-  "attempted_at": "2026-10-25T23:47:01+08:00",
+  "attempted_at": "2026-10-26T18:17:02+08:00",
   "error": "PSI gauge image not found on the page (layout may have changed)"
 }
