@@ -102,9 +102,13 @@ def find_images(html):
         alt, src = (a.get("alt") or "").lower(), a.get("src") or ""
         if not src:
             continue
-        if "gauge" in alt or "new-chart" in src.lower():
+        low = src.lower()
+        if ("gauge" in alt or "new-chart" in low or "psi-forecast" in low or "chart_" in low
+                or re.search(r"psi forecast for .*\d+\s*[-–—]\s*\d+", alt)):
             gauge = gauge or src
-        if "forecast header" in alt or "header-image" in src.lower():
+            STATUS.setdefault("gauge_alt", a.get("alt"))
+        elif ("forecast header" in alt or "header-image" in low or "psi-header" in low
+                or alt.startswith("psi forecast for planning")):
             header = header or src
     if not gauge:
         raise RuntimeError("PSI gauge image not found on the page (layout may have changed)")
@@ -285,7 +289,7 @@ def main():
         else:
             html = http_get(PAGE).decode("utf-8", "replace")
             write_status(result="page fetched", html_bytes=len(html),
-                         imgs=re.findall(r"<img[^>]*>", html)[:12])
+                         imgs=[i for i in re.findall(r"<img[^>]*>", html) if "health-advisory" in i][:6])
             gauge_url, header_url = find_images(html)
             header_date = date_from_filename(header_url)
             img = Path(tmp) / "gauge.png"
