@@ -8,3 +8,4 @@ forecast_date,low,high,band_low,band_high,checked_at
 2026-10-23,101,150,Unhealthy,Unhealthy,2026-10-22T23:18:07+08:00
 2026-10-24,90,140,Moderate,Unhealthy,2026-10-23T23:04:58+08:00
 2026-10-25,80,130,Moderate,Unhealthy,2026-10-24T22:01:21+08:00
+2026-10-27,60,90,Moderate,Moderate,2026-10-27T14:42:46+08:00
