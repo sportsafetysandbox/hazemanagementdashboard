@@ -1,18 +1,18 @@
 {
-  "result": "stored",
-  "html_bytes": 67593,
+  "result": "page still shows old forecast",
+  "html_bytes": 67585,
   "imgs": [
     "<img src=\"/images/default-source/health-advisory-images/psi-header_2026-11-03.png\" style=\"display:block;width:100%;height:auto;border:0;\" alt=\"PSI Forecast for planning outdoor activities on 3 November 2026.\" />",
     "<img src=\"/images/default-source/health-advisory-images/psi-forecast_2026-11-03_51-80.png\" style=\"display:inline-block;max-width:100%;height:auto;border:0;\" alt=\"PSI forecast for 3 November 2026 is 51\u201380, within the Moderate range.\" />",
     "<img src=\"/images/default-source/health-advisory-images/psi-advisory_good---moderate65900c74-2560-4525-b56d-030ae910d853.png\" style=\"display:inline-block;max-width:100%;height:auto;border:0;\" alt=\"Good\u2013Moderate PSI (0\u2013100): Healthy persons, elderly people, pregnant women, children, and persons with chronic lung or heart disease can continue normal activities. Advice is based on the high end of the PSI forecast.\" />",
     "<img src=\"/images/default-source/health-advisory-images/haze-pm-psi-guide-a4-yoca-english_18-oct.jpg\" alt=\"NEA PSI Poster\">"
   ],
-  "attempted_at": "2026-11-03T04:22:59+08:00",
+  "attempted_at": "2026-11-03T18:17:07+08:00",
   "gauge_alt": "PSI forecast for 3 November 2026 is 51\u201380, within the Moderate range.",
   "gauge_url": "https://www.haze.gov.sg/images/default-source/health-advisory-images/psi-forecast_2026-11-03_51-80.png",
   "header_url": "https://www.haze.gov.sg/images/default-source/health-advisory-images/psi-header_2026-11-03.png",
   "image_bytes": 70218,
-  "forecast_date": "2026-11-03",
+  "gauge_date": "2026-11-03",
   "lo": 51,
   "hi": 80
 }
