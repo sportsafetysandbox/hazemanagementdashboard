@@ -1,9 +1,9 @@
 {
   "result": "error",
-  "html_bytes": 64646,
+  "html_bytes": 64970,
   "imgs": [
     "<img src=\"/images/default-source/health-advisory-images/haze-pm-psi-guide-a4-yoca-english_18-oct.jpg\" alt=\"NEA PSI Poster\">"
   ],
-  "attempted_at": "2026-11-11T01:51:38+08:00",
+  "attempted_at": "2026-11-11T18:17:03+08:00",
   "error": "PSI gauge image not found on the page (layout may have changed)"
 }
