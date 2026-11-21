@@ -1,132 +1,132 @@
 {
-  "fetched_at": "2026-11-22T05:47:01+08:00",
+  "fetched_at": "2026-11-22T06:02:00+08:00",
   "pm25_1hr": {
-    "timestamp": "2026-11-22T05:00:00+08:00",
-    "north": 10,
-    "south": 13,
-    "east": 12,
-    "west": 15,
-    "central": 15,
+    "timestamp": "2026-11-22T06:00:00+08:00",
+    "north": 8,
+    "south": 12,
+    "east": 13,
+    "west": 16,
+    "central": 11,
     "trend": {
       "north": "flat",
       "south": "flat",
-      "east": "flat",
+      "east": "up",
       "west": "flat",
       "central": "flat"
     },
     "history": {
       "timestamps": [
-        "2026-11-22T00:00:00+08:00",
         "2026-11-22T01:00:00+08:00",
         "2026-11-22T02:00:00+08:00",
         "2026-11-22T03:00:00+08:00",
         "2026-11-22T04:00:00+08:00",
-        "2026-11-22T05:00:00+08:00"
+        "2026-11-22T05:00:00+08:00",
+        "2026-11-22T06:00:00+08:00"
       ],
       "north": [
-        17,
         null,
         null,
         null,
         4,
-        10
+        10,
+        8
       ],
       "south": [
-        10,
         null,
         null,
         null,
         7,
-        13
+        13,
+        12
       ],
       "east": [
-        9,
         null,
         null,
         null,
         11,
-        12
+        12,
+        13
       ],
       "west": [
-        16,
         null,
         null,
         null,
         15,
-        15
+        15,
+        16
       ],
       "central": [
-        17,
         null,
         null,
         null,
         12,
-        15
+        15,
+        11
       ]
     }
   },
   "psi_24hr": {
-    "timestamp": "2026-11-22T05:00:00+08:00",
+    "timestamp": "2026-11-22T06:00:00+08:00",
     "north": 32,
-    "south": 36,
-    "east": 33,
-    "west": 41,
-    "central": 40,
+    "south": 38,
+    "east": 34,
+    "west": 43,
+    "central": 41,
     "trend": {
       "north": "flat",
-      "south": "flat",
-      "east": "flat",
-      "west": "flat",
-      "central": "flat"
+      "south": "up",
+      "east": "up",
+      "west": "up",
+      "central": "up"
     },
     "history": {
       "timestamps": [
-        "2026-11-22T00:00:00+08:00",
         "2026-11-22T01:00:00+08:00",
         "2026-11-22T02:00:00+08:00",
         "2026-11-22T03:00:00+08:00",
         "2026-11-22T04:00:00+08:00",
-        "2026-11-22T05:00:00+08:00"
+        "2026-11-22T05:00:00+08:00",
+        "2026-11-22T06:00:00+08:00"
       ],
       "north": [
-        31,
         null,
         null,
         null,
+        32,
         32,
         32
       ],
       "south": [
-        33,
         null,
         null,
         null,
         35,
-        36
+        36,
+        38
       ],
       "east": [
-        32,
         null,
         null,
         null,
         32,
-        33
+        33,
+        34
       ],
       "west": [
-        37,
         null,
         null,
         null,
         40,
-        41
+        41,
+        43
       ],
       "central": [
-        33,
         null,
         null,
         null,
         39,
-        40
+        40,
+        41
       ]
     }
   }
